@@ -12,6 +12,7 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
 ```sh
 ./gradlew assembleFernandoDebug                 # APK de um usuário
 ./gradlew assembleFernandoRelease               # assinado se existir assinatura/ (veja abaixo)
+./gradlew gerarReleases                         # release de todos os flavors + versão e assinatura de cada APK
 ./gradlew testFernandoDebugUnitTest             # testes de unidade
 ./gradlew testFernandoDebugUnitTest --tests "com.lotus.FormatosTest.duracaoLegivel"   # um teste só
 ./gradlew lintFernandoDebug
@@ -21,9 +22,21 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
   e os testes de unidade **não rodam** nesta pasta no Windows ("Could not execute test class": o acento quebra
   o classpath). Para rodá-los, copie o projeto para um caminho sem acento.
 - O emulador desta máquina não sobe. Para ver telas, renderize os `@Preview` (detalhes na skill `lotus-telas`).
-- Assinatura do release: `assinatura/assinatura.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`,
-  com `storeFile` relativo à pasta) e o `.jks`, ambos fora do git. Sem o arquivo, o release sai `-unsigned`;
-  o debug não depende dele. Todos os flavors usam a mesma chave.
+
+## Release
+
+1. Aumente `versionCode` (inteiro, sempre maior que o instalado; senão o celular não atualiza) e `versionName`
+   (texto que a pessoa vê) no `defaultConfig` de `app/build.gradle.kts`. Valem para todos os flavors.
+2. `./gradlew gerarReleases`: roda `assembleRelease` e, para cada flavor, lê o APK com `aapt2` (versão) e
+   `apksigner` (certificado). Saída esperada: `CN=Lotus, O=Projeto Lotus, C=BR`, SHA-256 `907e8a01…7069dc`.
+   Outro SHA-256 = outra chave, e os celulares recusam a atualização.
+3. APKs em `app/build/outputs/apk/<flavor>/release/app-<flavor>-release.apk`. Mesmo `applicationId` em todos:
+   instalar o de um flavor substitui o de outro no mesmo aparelho.
+
+Assinatura: `assinatura/assinatura.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`, com
+`storeFile` relativo à pasta) e `assinatura/lotus-release.jks`, ambos fora do git e com backup fora da máquina.
+**Nunca gere outra keystore**: em máquina nova, restaure a pasta do backup. Sem o arquivo, o release sai
+`-unsigned` (e `gerarReleases` mostra "SEM ASSINATURA"); o debug não depende dele.
 
 ## Um APK por usuário (`env/`)
 
