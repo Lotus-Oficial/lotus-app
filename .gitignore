@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Dados de cada usuário (um APK por arquivo); só o modelo vai para o git
+/env/*
+!/env/exemplo.env.example

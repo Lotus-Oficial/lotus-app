@@ -3,6 +3,28 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Um APK por usuário: cada env/<nome>.env vira o flavor <nome>, todos com o mesmo applicationId.
+val pastaEnv: File = rootProject.file("env")
+val arquivosEnv: List<File> = pastaEnv.listFiles { f -> f.isFile && f.extension == "env" }.orEmpty().sortedBy { it.name }
+val chavesEnv = listOf("NOME_USUARIO", "ID_USUARIO")
+
+if (arquivosEnv.isEmpty()) {
+    throw GradleException("Nenhum .env em $pastaEnv. Copie env/exemplo.env.example para env/<usuario>.env.")
+}
+
+/** Lê `CHAVE=valor`, ignorando linhas vazias e comentários com `#`. */
+fun lerEnv(arquivo: File): Map<String, String> = arquivo.readLines()
+    .map { it.trim() }
+    .filter { it.isNotEmpty() && !it.startsWith("#") }
+    .associate { linha ->
+        val partes = linha.split("=", limit = 2)
+        if (partes.size != 2) throw GradleException("${arquivo.name}: linha sem '=': $linha")
+        partes[0].trim() to partes[1].trim()
+    }
+
+/** Valor pronto para o `buildConfigField` (literal String de Java). */
+fun String.comoLiteral() = "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
 android {
     namespace = "com.lotus"
     compileSdk {
@@ -19,6 +41,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "usuario"
+    productFlavors {
+        arquivosEnv.forEach { arquivo ->
+            val nome = arquivo.nameWithoutExtension
+            if (!nome.matches(Regex("[a-z][A-Za-z0-9]*"))) {
+                throw GradleException("${arquivo.name}: o nome do arquivo vira o flavor; use letras e números, começando por minúscula.")
+            }
+            val env = lerEnv(arquivo)
+            create(nome) {
+                dimension = "usuario"
+                chavesEnv.forEach { chave ->
+                    val valor = env[chave] ?: throw GradleException("${arquivo.name}: falta $chave")
+                    buildConfigField("String", chave, valor.comoLiteral())
+                }
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
@@ -33,6 +73,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
