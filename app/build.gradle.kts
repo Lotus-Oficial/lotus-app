@@ -50,7 +50,7 @@ android {
         applicationId = "com.lotus"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -97,8 +97,9 @@ android {
         release {
             signingConfig = signingConfigs.findByName("release")
             optimization {
-                enable = true
-                packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
+                // Desligado: o R8 move classes do kotlin.collections para fora do pacote e o app fecha
+                // com IllegalAccessError ao abrir. Religar só depois de testar o release num celular.
+                enable = false
             }
         }
     }
