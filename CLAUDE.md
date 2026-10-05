@@ -33,6 +33,10 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
 3. APKs em `app/build/outputs/apk/<flavor>/release/app-<flavor>-release.apk`. Mesmo `applicationId` em todos:
    instalar o de um flavor substitui o de outro no mesmo aparelho.
 
+R8 desligado no release (`optimization { enable = false }`): com `packageScope` incluindo `kotlin.**`, ele tirava
+`CollectionsKt__MutableCollectionsJVMKt` do pacote `kotlin.collections` e o app fechava ao abrir com
+`IllegalAccessError`. Ao religar, deixe `kotlin.**` fora do `packageScope` e teste o release num aparelho antes de distribuir.
+
 Assinatura: `assinatura/assinatura.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`, com
 `storeFile` relativo à pasta) e `assinatura/lotus-release.jks`, ambos fora do git e com backup fora da máquina.
 **Nunca gere outra keystore**: em máquina nova, restaure a pasta do backup. Sem o arquivo, o release sai
