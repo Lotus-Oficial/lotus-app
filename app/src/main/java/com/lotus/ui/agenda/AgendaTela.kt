@@ -254,15 +254,15 @@ private fun BotaoTracejado(texto: String, onClick: () -> Unit) {
     }
 }
 
-/** Dia da semana como um círculo: petróleo quando a agenda roda nele. */
+/** Dia da semana como um círculo: lilás quando a agenda roda nele. */
 @Composable
 private fun Dia(nome: String, marcado: Boolean, onClick: () -> Unit) {
     val cs = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = if (marcado) cs.primary else cs.surfaceContainerLowest,
-        contentColor = if (marcado) cs.onPrimary else cs.onSurfaceVariant,
+        color = if (marcado) cs.tertiary else cs.surfaceContainerLowest,
+        contentColor = if (marcado) cs.onTertiary else cs.onSurfaceVariant,
         border = if (marcado) null else BorderStroke(1.5.dp, cs.outlineVariant),
         modifier = Modifier.size(42.dp).semantics {
             contentDescription = nome

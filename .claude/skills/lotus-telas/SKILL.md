@@ -42,7 +42,7 @@ claro e escuro). Telas novas devem parecer da mesma família que essas.
 | **Dourado** | `#C9A54C` | Botão de destaque ("Começar", "Ver zonas", "Regar tudo"), traço sob títulos, anel de progresso, número da zona atual, tracinho da aba aberta |
 | Dourado claro | `#E4C77E` | Rótulos sobre o petróleo ("Regando agora", "Próxima irrigação"), botão de contorno no destaque |
 | Dourado suave / texto | `#F1E7CC` / `#7A5C17` | Fundo e texto de coisas douradas claras (botão tracejado, ícone das zonas) |
-| **Lilás** | `#B3A4D6` | Pílula "Irrigando", zona feita (✓), círculo de enfeite, caixa d'água |
+| **Lilás** | `#B3A4D6` | Pílula "Irrigando", zona feita (✓), círculo de enfeite, caixa d'água, dias marcados da Agenda |
 | Lilás suave / texto | `#E6E0F3` / `#5A4A8A`, sobre lilás `#2E2347` | Texto e fundos lilases |
 | Texto secundário | `#3E5A63`, `#5B7178` | Legendas, rótulos |
 | Bordas | `#E6E2D8` (cartões), `#C9D3D6` (campos) | Cartões brancos com 1 dp de borda |
@@ -149,6 +149,8 @@ Código em `app/src/main/java/com/lotus/`:
 - Nome longo de casa: o seletor e os títulos usam uma linha com reticências.
 - Dias por extenso em datas ("quarta às 06:00"); abreviados só em listas ("seg, qua, sex").
 - Botões dentro do destaque: texto curto ("Parar", não "Parar tudo") para caber em uma linha.
+- Dias marcados da Agenda: círculo lilás (`tertiary`) com letra `onTertiary`, pedido da usuária
+  (outubro de 2026). Desmarcado continua branco com borda.
 
 ## Conferir visualmente
 
