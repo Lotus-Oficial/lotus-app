@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone da marca dentro da área segura do ícone adaptativo (66% do centro). -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/lotus_icone"
+    android:inset="22%" />

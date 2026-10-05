@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Só cobre a janela antes do Compose desenhar; as cores de verdade estão em ui/theme. -->
+    <style name="Theme.Lotus" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/lotus_creme</item>
+    </style>
+</resources>
