@@ -11,7 +11,7 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
 
 ```sh
 ./gradlew assembleFernandoDebug                 # APK de um usuário
-./gradlew assembleFernandoRelease               # ainda sem signingConfig: sai "-unsigned" e não instala
+./gradlew assembleFernandoRelease               # assinado se existir assinatura/ (veja abaixo)
 ./gradlew testFernandoDebugUnitTest             # testes de unidade
 ./gradlew testFernandoDebugUnitTest --tests "com.lotus.FormatosTest.duracaoLegivel"   # um teste só
 ./gradlew lintFernandoDebug
@@ -21,6 +21,9 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
   e os testes de unidade **não rodam** nesta pasta no Windows ("Could not execute test class": o acento quebra
   o classpath). Para rodá-los, copie o projeto para um caminho sem acento.
 - O emulador desta máquina não sobe. Para ver telas, renderize os `@Preview` (detalhes na skill `lotus-telas`).
+- Assinatura do release: `assinatura/assinatura.properties` (`storeFile`, `storePassword`, `keyAlias`, `keyPassword`,
+  com `storeFile` relativo à pasta) e o `.jks`, ambos fora do git. Sem o arquivo, o release sai `-unsigned`;
+  o debug não depende dele. Todos os flavors usam a mesma chave.
 
 ## Um APK por usuário (`env/`)
 
