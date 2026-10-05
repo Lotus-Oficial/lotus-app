@@ -2,6 +2,7 @@ package com.lotus.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lotus.dados.CasasDoUsuario
 import com.lotus.dados.Comando
 import com.lotus.dados.LotusRepositorio
 import com.lotus.dados.Resposta
@@ -23,7 +24,7 @@ data class Pendente(val site: SiteId, val comando: Comando)
 class LotusViewModel : ViewModel() {
 
     // Troca pelo repositório MQTT quando o broker estiver no ar.
-    private val fonte: LotusRepositorio = SimuladorLotus(viewModelScope)
+    private val fonte: LotusRepositorio = SimuladorLotus(viewModelScope, CasasDoUsuario)
 
     val sites: StateFlow<List<Site>> = fonte.sites
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.lotus.BuildConfig
 import com.lotus.dados.Nivel
 import com.lotus.dados.Site
 import com.lotus.dados.Zona
@@ -113,8 +114,8 @@ private fun Cabecalho(agora: Long) {
         LogoPequeno(38.dp)
         Spacer(Modifier.width(12.dp))
         Column {
-            Text("Olá,", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(saudacao(emCasa(agora)), style = MaterialTheme.typography.titleLarge)
+            Text("${saudacao(emCasa(agora))},", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(BuildConfig.NOME_USUARIO, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

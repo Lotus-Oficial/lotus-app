@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.lotus.dados.CasasDoUsuario
 import com.lotus.dados.Comando
-import com.lotus.dados.SiteId
 import com.lotus.ui.LotusViewModel
 import com.lotus.ui.agenda.AgendaTela
 import com.lotus.ui.boasvindas.BoasVindasTela
@@ -68,7 +68,7 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
     LaunchedEffect(Unit) { vm.avisos.collect { avisos.showSnackbar(it) } }
 
     var aba by rememberSaveable { mutableStateOf(Aba.Inicio) }
-    var casaId by rememberSaveable { mutableStateOf(SiteId.ESP) }
+    var casaId by rememberSaveable { mutableStateOf(CasasDoUsuario.first()) }
     BackHandler(enabled = aba != Aba.Inicio) { aba = Aba.Inicio }
 
     val casa = sites.first { it.id == casaId }

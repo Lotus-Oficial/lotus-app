@@ -23,7 +23,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lotus.BuildConfig
 import com.lotus.R
+import com.lotus.dados.CasasDoUsuario
 import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.EstiloBotao
 import com.lotus.ui.componentes.PreviewLotus
@@ -78,11 +80,12 @@ fun BoasVindasTela(onComecar: () -> Unit, modifier: Modifier = Modifier) {
             Spacer(Modifier.weight(1f))
 
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("Bem-vinda ao", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 22.sp), color = d.texto)
+                Text("${BuildConfig.NOME_USUARIO}, boas-vindas ao", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 22.sp), color = d.texto)
                 Text("projeto Lótus", style = MaterialTheme.typography.headlineLarge, color = d.texto)
                 TracoDourado(largura = 96.dp)
                 Text(
-                    "Acompanhe a irrigação das duas casas, a chuva e a caixa d'água de onde você estiver.",
+                    "Acompanhe a irrigação ${if (CasasDoUsuario.size == 1) "da sua casa" else "das suas casas"}, " +
+                        "a chuva e a caixa d'água de onde você estiver.",
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 17.sp, lineHeight = 25.sp, fontWeight = FontWeight.Normal),
                     color = d.textoSuave,
                     modifier = Modifier.padding(top = 8.dp),

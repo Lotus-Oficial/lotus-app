@@ -7,6 +7,8 @@ plugins {
 val pastaEnv: File = rootProject.file("env")
 val arquivosEnv: List<File> = pastaEnv.listFiles { f -> f.isFile && f.extension == "env" }.orEmpty().sortedBy { it.name }
 val chavesEnv = listOf("NOME_USUARIO", "ID_USUARIO")
+// CASAS=esp,clp: as casas que o APK mostra. Mesmos valores de SiteId.topico (dados/Contrato.kt).
+val casasValidas = listOf("esp", "clp")
 
 if (arquivosEnv.isEmpty()) {
     throw GradleException("Nenhum .env em $pastaEnv. Copie env/exemplo.env.example para env/<usuario>.env.")
@@ -55,6 +57,12 @@ android {
                     val valor = env[chave] ?: throw GradleException("${arquivo.name}: falta $chave")
                     buildConfigField("String", chave, valor.comoLiteral())
                 }
+                val casas = (env["CASAS"] ?: throw GradleException("${arquivo.name}: falta CASAS"))
+                    .split(",").map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+                if (casas.isEmpty() || casas.any { it !in casasValidas }) {
+                    throw GradleException("${arquivo.name}: CASAS precisa ser uma lista de ${casasValidas.joinToString(", ")}, separadas por vírgula.")
+                }
+                buildConfigField("String[]", "CASAS", casas.joinToString(", ", "{", "}") { it.comoLiteral() })
             }
         }
     }

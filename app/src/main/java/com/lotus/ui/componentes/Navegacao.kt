@@ -92,8 +92,8 @@ fun BarraNavegacao(atual: Aba, onEscolher: (Aba) -> Unit, modifier: Modifier = M
 }
 
 /**
- * Troca entre as duas casas. Cada uma leva um pontinho com a situação dela,
- * para ver a outra casa de relance sem trocar.
+ * Troca entre as casas do usuário. Cada uma leva um pontinho com a situação dela,
+ * para ver a outra casa de relance sem trocar. Com uma casa só, vira o nome e a situação dela.
  */
 @Composable
 fun SeletorCasa(sites: List<Site>, atual: Site, agora: Long, onEscolher: (Site) -> Unit, modifier: Modifier = Modifier) {

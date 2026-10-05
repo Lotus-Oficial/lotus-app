@@ -11,13 +11,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Dois quadros de mentira que seguem o contrato lotus/v1: retêm o último estado,
+ * Quadros de mentira, um por casa de [casas], que seguem o contrato lotus/v1: retêm o último estado,
  * republicam o `state` a cada 15 s durante a irrigação e respondem aos comandos
  * com os mesmos erros do quadro de verdade. Serve para desenhar e testar as telas
  * antes do broker existir.
  */
 class SimuladorLotus(
     private val escopo: CoroutineScope,
+    casas: List<SiteId>,
     private val agora: () -> Long = System::currentTimeMillis,
 ) : LotusRepositorio {
 
@@ -31,10 +32,7 @@ class SimuladorLotus(
     )
 
     private val trava = Mutex()
-    private val quadros = linkedMapOf(
-        SiteId.ESP to Quadro(siteVazio(SiteId.ESP)),
-        SiteId.CLP to Quadro(siteVazio(SiteId.CLP)),
-    )
+    private val quadros = casas.associateWithTo(LinkedHashMap()) { Quadro(siteVazio(it)) }
 
     private val _sites = MutableStateFlow(quadros.values.map { it.site })
     override val sites: StateFlow<List<Site>> = _sites.asStateFlow()
@@ -42,10 +40,17 @@ class SimuladorLotus(
     init {
         escopo.launch {
             // As mensagens retidas chegam logo depois da inscrição, uma casa de cada vez.
-            delay(1_200)
-            trava.withLock { carregarEsp(); publicar() }
             delay(600)
-            trava.withLock { carregarClp(); publicar() }
+            for (id in quadros.keys) {
+                delay(600)
+                trava.withLock {
+                    when (id) {
+                        SiteId.ESP -> carregarEsp()
+                        SiteId.CLP -> carregarClp()
+                    }
+                    publicar()
+                }
+            }
             while (true) {
                 delay(1_000)
                 trava.withLock { quadros.values.forEach { avancar(it) }; publicar() }
