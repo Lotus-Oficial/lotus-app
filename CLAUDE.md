@@ -10,11 +10,11 @@ de duas casas pelo broker MQTT. Código, comentários, commits e textos da inter
 Há product flavors por usuário (veja abaixo), então as tarefas levam o nome do flavor:
 
 ```sh
-./gradlew assembleUsuario1Debug                 # APK de um usuário
-./gradlew assembleUsuario1Release
-./gradlew testUsuario1DebugUnitTest             # testes de unidade
-./gradlew testUsuario1DebugUnitTest --tests "com.lotus.FormatosTest.duracaoLegivel"   # um teste só
-./gradlew lintUsuario1Debug
+./gradlew assembleFernandoDebug                 # APK de um usuário
+./gradlew assembleFernandoRelease               # ainda sem signingConfig: sai "-unsigned" e não instala
+./gradlew testFernandoDebugUnitTest             # testes de unidade
+./gradlew testFernandoDebugUnitTest --tests "com.lotus.FormatosTest.duracaoLegivel"   # um teste só
+./gradlew lintFernandoDebug
 ```
 
 - A pasta `Lótus` tem acento: o build depende de `android.overridePathCheck=true` (`gradle.properties`),
