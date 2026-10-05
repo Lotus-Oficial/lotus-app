@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,6 +25,14 @@ fun lerEnv(arquivo: File): Map<String, String> = arquivo.readLines()
         if (partes.size != 2) throw GradleException("${arquivo.name}: linha sem '=': $linha")
         partes[0].trim() to partes[1].trim()
     }
+
+// Assinatura do release: assinatura/assinatura.properties + .jks, fora do git. Sem eles o release sai "-unsigned".
+val arquivoAssinatura: File = rootProject.file("assinatura/assinatura.properties")
+val assinatura: Properties? = arquivoAssinatura.takeIf { it.isFile }?.let { f ->
+    val props = Properties()
+    f.inputStream().use { props.load(it) }
+    props
+}
 
 /** Valor pronto para o `buildConfigField` (literal String de Java). */
 fun String.comoLiteral() = "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
@@ -67,8 +77,22 @@ android {
         }
     }
 
+    signingConfigs {
+        assinatura?.let { props ->
+            create("release") {
+                fun chave(nome: String): String = props.getProperty(nome)
+                    ?: throw GradleException("${arquivoAssinatura.name}: falta $nome")
+                storeFile = arquivoAssinatura.resolveSibling(chave("storeFile"))
+                storePassword = chave("storePassword")
+                keyAlias = chave("keyAlias")
+                keyPassword = chave("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
