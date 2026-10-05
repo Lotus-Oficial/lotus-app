@@ -20,3 +20,6 @@ local.properties
 
 # Chave e senha da assinatura do release
 /assinatura/
+*.jks
+*.keystore
+keystore.properties
