@@ -27,6 +27,9 @@ Há product flavors por usuário (veja abaixo), então as tarefas levam o nome d
 `app/build.gradle.kts` lê `env/*.env` na configuração do Gradle: cada `env/<nome>.env` vira o
 flavor `<nome>` (dimensão `usuario`, mesmo `applicationId` `com.lotus`) e suas chaves
 `NOME_USUARIO` e `ID_USUARIO` viram `BuildConfig.NOME_USUARIO` / `BuildConfig.ID_USUARIO`.
+`CASAS=esp,clp` diz quais casas o APK mostra: vira `BuildConfig.CASAS` (`String[]`, validado contra
+`casasValidas` no Gradle) e, no app, `CasasDoUsuario` (`dados/Usuario.kt`), que alimenta o repositório
+e a casa inicial. Casa nova no contrato: acrescentar em `SiteId` e em `casasValidas`.
 
 - `env/*.env` fica fora do git; só `env/exemplo.env.example` é versionado. Sem nenhum `.env`, o build falha de propósito.
 - Usuário novo: copiar o modelo para `env/<nome>.env` (letras e números, começando por minúscula). Não precisa editar o Gradle.
@@ -55,8 +58,8 @@ com o app por um broker MQTT na nuvem (EMQX, TLS 8883). Não há API HTTP.
   `FormatosTest`); mensagens de erro e falha em `ui/Textos.kt`, sempre em termos do quintal, não do hardware.
 - **Navegação**: `MainActivity.kt` mostra Boas-vindas na primeira abertura (flag em SharedPreferences) e
   depois três abas (Início, Zonas, Agenda) da casa escolhida, sem biblioteca de navegação.
-- **Dados ainda fixos no código** (a substituir pelo `BuildConfig`/configuração): nomes das casas em
-  `SiteId` (`Contrato.kt`), "Bem-vinda" e "das duas casas" em `BoasVindasTela.kt`, zonas e agendas do simulador.
+- **Nome do usuário nas telas**: vem de `BuildConfig.NOME_USUARIO` (Boas-vindas e cabeçalho do Início).
+  Ainda fixos no código: nomes das casas em `SiteId` (`Contrato.kt`) e zonas e agendas do simulador.
 
 ## Design
 
