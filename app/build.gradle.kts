@@ -1,4 +1,7 @@
+import java.io.ByteArrayOutputStream
 import java.util.Properties
+import javax.inject.Inject
+import org.gradle.process.ExecOperations
 
 plugins {
     alias(libs.plugins.android.application)
@@ -128,4 +131,57 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+/** Lê versão (aapt2) e assinatura (apksigner) do APK release de cada flavor. */
+abstract class ConferirReleases : DefaultTask() {
+    @get:Inject abstract val exec: ExecOperations
+    @get:Internal abstract val pastaApks: DirectoryProperty
+    @get:Internal abstract val flavors: ListProperty<String>
+    @get:Internal abstract val buildTools: DirectoryProperty
+
+    @TaskAction
+    fun conferir() {
+        val windows = System.getProperty("os.name").startsWith("Windows")
+        val aapt2 = buildTools.file(if (windows) "aapt2.exe" else "aapt2").get().asFile
+        val apksigner = buildTools.file(if (windows) "apksigner.bat" else "apksigner").get().asFile
+
+        flavors.get().forEach { flavor ->
+            val apk = pastaApks.dir("$flavor/release").get().asFile
+                .listFiles { f -> f.extension == "apk" }?.singleOrNull()
+                ?: throw GradleException("Nenhum APK release de $flavor. Rode assembleRelease antes.")
+            val versao = Regex("versionCode='(\\d+)' versionName='([^']*)'")
+                .find(rodar(aapt2, "dump", "badging", apk.path))?.destructured
+            val certificado = rodar(apksigner, "verify", "--print-certs", apk.path)
+            val dono = Regex("certificate DN: (.+)").find(certificado)?.groupValues?.get(1)?.trim()
+            val sha256 = Regex("certificate SHA-256 digest: (\\w+)").find(certificado)?.groupValues?.get(1)
+
+            logger.lifecycle("")
+            logger.lifecycle("== $flavor: ${apk.name}")
+            logger.lifecycle("   versão:     " + (versao?.let { (codigo, nome) -> "$nome (versionCode $codigo)" } ?: "não deu para ler"))
+            logger.lifecycle("   assinatura: " + (dono?.let { "$it, SHA-256 $sha256" } ?: "SEM ASSINATURA (falta assinatura/assinatura.properties)"))
+        }
+    }
+
+    private fun rodar(programa: File, vararg argumentos: String): String {
+        val saida = ByteArrayOutputStream()
+        exec.exec {
+            commandLine(listOf(programa.path) + argumentos)
+            standardOutput = saida
+            errorOutput = saida
+            isIgnoreExitValue = true
+        }
+        return saida.toString(Charsets.UTF_8)
+    }
+}
+
+// ./gradlew gerarReleases: gera o release de todos os flavors e mostra versão e assinatura de cada APK.
+tasks.register<ConferirReleases>("gerarReleases") {
+    group = "lotus"
+    description = "Gera o APK release de cada flavor e confere versão e assinatura."
+    dependsOn("assembleRelease")
+    pastaApks.set(layout.buildDirectory.dir("outputs/apk"))
+    flavors.set(arquivosEnv.map { it.nameWithoutExtension })
+    buildTools.set(androidComponents.sdkComponents.sdkDirectory.map { it.dir("build-tools/${android.buildToolsVersion}") })
+    outputs.upToDateWhen { false }
 }
