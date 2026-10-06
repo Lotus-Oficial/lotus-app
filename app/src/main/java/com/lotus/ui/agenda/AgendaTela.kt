@@ -198,7 +198,7 @@ fun AgendaTela(
             if (cicloS > 0) {
                 item {
                     Text(
-                        "Cada rega passa pelas ${casa.zonas.size} zonas, uma depois da outra: " +
+                        "Cada rega passa pelas ${casa.zonas.size} áreas, uma depois da outra: " +
                             "cerca de ${duracao(cicloS)} no total. Ela é pulada se estiver chovendo ou a caixa estiver baixa, " +
                             "e para sozinha se começar a chover.",
                         style = MaterialTheme.typography.bodySmall,
@@ -238,15 +238,16 @@ fun AgendaTela(
 }
 
 /**
- * Fundo da Agenda Liquid Glass: bolha lilás à esquerda, nuvens ou chuva no alto quando o tempo
- * pede (o sol fica só no Início), e o anel dourado com o círculo lilás no canto de cima.
+ * Fundo da Agenda Liquid Glass: bolha lilás à esquerda, nuvens passando no alto (com chuva quando
+ * chove; o sol fica só no Início, então no tempo seco ficam só as nuvens, como no canvas),
+ * e o anel dourado com o círculo lilás no canto de cima.
  */
 @Composable
 private fun FundoAgenda(tempo: Tempo?) {
     val d = Lotus.destaque
     Box(Modifier.fillMaxSize().fonteDoVidro()) {
         BolhaLilas(x = -90, y = 330)
-        FundoClima(tempo.takeIf { it != Tempo.SOL }, Modifier.fillMaxWidth().fillMaxHeight(0.5f))
+        FundoClima(if (tempo == Tempo.SOL) Tempo.NUBLADO else tempo, Modifier.fillMaxWidth().fillMaxHeight(0.5f))
         Spacer(
             Modifier
                 .align(Alignment.TopEnd)

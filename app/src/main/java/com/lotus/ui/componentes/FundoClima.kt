@@ -4,12 +4,16 @@ import android.provider.Settings
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +21,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
@@ -215,6 +220,47 @@ private fun Nuvens(cores: CoresClima, relogio: State<Float>, chuva: Boolean, mod
         }
         // Some aos poucos da metade para baixo, para não brigar com o conteúdo.
         drawRect(Brush.verticalGradient(0.55f to Color.Black, 1f to Color.Transparent), blendMode = BlendMode.DstIn)
+    }
+}
+
+/**
+ * Gota do cartão "Caixa d'água" (canvas): com água, sobe e desce devagar com um brilho lilás
+ * pulsando atrás; baixa, fica parada. Só enfeite: o texto do cartão já diz o nível.
+ */
+@Composable
+fun GotaDaCaixa(comAgua: Boolean, cor: Color, modifier: Modifier = Modifier) {
+    val relogio = relogioDaAnimacao()
+    val brilho = Lotus.destaque.lilas
+    Box(modifier.size(18.dp), contentAlignment = Alignment.Center) {
+        if (comAgua) {
+            // Maior que a gota, sem empurrar o texto do lado.
+            Canvas(Modifier.requiredSize(28.dp)) {
+                val r = size.minDimension / 2 * (0.9f + 0.15f * pulso(relogio.value, 2.4f))
+                drawCircle(
+                    Brush.radialGradient(0f to brilho.copy(alpha = 0.6f), 0.7f to Color.Transparent, center = center, radius = r),
+                    radius = r,
+                )
+            }
+        }
+        Icon(
+            Icons.Rounded.WaterDrop,
+            contentDescription = null,
+            tint = cor,
+            modifier = Modifier.size(18.dp).graphicsLayer {
+                // Sobe 2 dp e volta, no ritmo do brilho.
+                if (comAgua) translationY = -2.dp.toPx() * pulso(relogio.value, 2.4f)
+            },
+        )
+    }
+}
+
+@PreviewLotus
+@Composable
+private fun GotaDaCaixaPreview() {
+    LotusTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Box(Modifier.size(60.dp), contentAlignment = Alignment.Center) { GotaDaCaixa(true, Lotus.destaque.lilas) }
+        }
     }
 }
 

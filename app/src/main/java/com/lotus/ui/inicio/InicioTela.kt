@@ -27,8 +27,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.lotus.BuildConfig
@@ -42,6 +40,7 @@ import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.CartaoDestaque
 import com.lotus.ui.componentes.Esqueleto
 import com.lotus.ui.componentes.FundoClima
+import com.lotus.ui.componentes.GotaDaCaixa
 import com.lotus.ui.componentes.fonteDoVidro
 import com.lotus.ui.componentes.EstiloBotao
 import com.lotus.ui.componentes.LogoPequeno
@@ -96,7 +95,7 @@ fun InicioTela(
             if (casa.sensores != null) item { Sensores(casa) }
             if (casa.zonas.isNotEmpty()) {
                 item {
-                    TituloSecao("Minhas zonas") {
+                    TituloSecao("Minhas áreas") {
                         TextButton(onClick = onVerZonas) { Text("Ver todas", style = MaterialTheme.typography.labelMedium) }
                     }
                 }
@@ -133,12 +132,12 @@ private fun Destaque(casa: Site, resumo: Resumo, agora: Long, onVerZonas: () -> 
         Resumo.Carregando -> Triple("", "", "")
         is Resumo.Regando -> Triple(
             "Regando agora",
-            resumo.nomeZona ?: "Zona ${resumo.zona}",
-            "Zona ${resumo.zona}" + (resumo.restanteS?.let { " · faltam ${relogio(it)}" } ?: ""),
+            resumo.nomeZona ?: "Área ${resumo.zona}",
+            "Área ${resumo.zona}" + (resumo.restanteS?.let { " · faltam ${relogio(it)}" } ?: ""),
         )
         is Resumo.Pausado -> Triple(
             "Pausado",
-            resumo.nomeZona ?: "Zona ${resumo.zona}",
+            resumo.nomeZona ?: "Área ${resumo.zona}",
             resumo.restanteS?.let { "Faltavam ${duracao(it)}" } ?: "",
         )
         is Resumo.Parado -> when (val p = resumo.proximaRega) {
@@ -146,7 +145,7 @@ private fun Destaque(casa: Site, resumo: Resumo, agora: Long, onVerZonas: () -> 
             else -> Triple(
                 "Próxima irrigação",
                 quandoCurto(p, hoje),
-                "Todas as ${casa.zonas.size} zonas · cerca de ${duracao(casa.zonas.sumOf { it.duracaoPadraoS })}" +
+                "Todas as ${casa.zonas.size} áreas · cerca de ${duracao(casa.zonas.sumOf { it.duracaoPadraoS })}" +
                     if (resumo.chovendo) "\nChovendo agora: pode ser pulada." else "",
             )
         }
@@ -180,7 +179,7 @@ private fun Destaque(casa: Site, resumo: Resumo, agora: Long, onVerZonas: () -> 
         }
         Spacer(Modifier.height(16.dp))
         BotaoComando(
-            texto = "Ver zonas",
+            texto = "Ver áreas",
             icone = null,
             enviando = false,
             onClick = onVerZonas,
@@ -196,27 +195,27 @@ private fun Sensores(casa: Site) {
     val s = casa.sensores ?: return
     val e = Lotus.estado
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Medida(
-            if (s.chuva) Icons.Rounded.Umbrella else Icons.Rounded.WbSunny,
-            "Chuva", if (s.chuva) "Chovendo" else "Seco",
-            if (s.chuva) e.agua.cor else Lotus.destaque.dourado,
-            Modifier.weight(1f),
-        )
-        Medida(
-            Icons.Rounded.WaterDrop,
-            "Caixa d'água", if (s.nivel == Nivel.OK) "Com água" else "Baixa",
-            if (s.nivel == Nivel.OK) Lotus.destaque.lilas else MaterialTheme.colorScheme.error,
-            Modifier.weight(1f),
-        )
+        Medida("Chuva", if (s.chuva) "Chovendo" else "Seco", Modifier.weight(1f)) {
+            Icon(
+                if (s.chuva) Icons.Rounded.Umbrella else Icons.Rounded.WbSunny,
+                contentDescription = null,
+                tint = if (s.chuva) e.agua.cor else Lotus.destaque.dourado,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        val comAgua = s.nivel == Nivel.OK
+        Medida("Caixa d'água", if (comAgua) "Com água" else "Baixa", Modifier.weight(1f)) {
+            GotaDaCaixa(comAgua, if (comAgua) Lotus.destaque.lilas else MaterialTheme.colorScheme.error)
+        }
     }
 }
 
 @Composable
-private fun Medida(icone: ImageVector, nome: String, valor: String, cor: Color, modifier: Modifier) {
+private fun Medida(nome: String, valor: String, modifier: Modifier, icone: @Composable () -> Unit) {
     Cartao(modifier) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icone, contentDescription = null, tint = cor, modifier = Modifier.size(18.dp))
+                icone()
                 Spacer(Modifier.width(8.dp))
                 Text(nome, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -245,7 +244,7 @@ private fun LinhaZona(zona: Zona, onClick: () -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text(zona.nome, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    "Zona ${zona.numero} · ${duracao(zona.duracaoPadraoS)}",
+                    "Área ${zona.numero} · ${duracao(zona.duracaoPadraoS)}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = cs.onSurfaceVariant,
                 )
