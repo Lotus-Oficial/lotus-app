@@ -68,7 +68,6 @@ import com.lotus.ui.componentes.LogoPequeno
 import com.lotus.ui.componentes.FaixaForaDoAr
 import com.lotus.ui.componentes.PontoDeSituacao
 import com.lotus.ui.componentes.PreviewLotus
-import com.lotus.ui.componentes.SeletorCasa
 import com.lotus.ui.componentes.TituloSecao
 import com.lotus.ui.componentes.TracoDourado
 import com.lotus.ui.componentes.agoraMs
@@ -94,10 +93,8 @@ import com.lotus.ui.texto
  */
 @Composable
 fun ZonasTela(
-    sites: List<Site>,
     casa: Site,
     pendentes: Set<Comando>,
-    onEscolherCasa: (Site) -> Unit,
     onEnviar: (Comando) -> Unit,
     modifier: Modifier = Modifier,
     margens: PaddingValues = PaddingValues(),
@@ -134,7 +131,8 @@ fun ZonasTela(
             modifier = Modifier.fillMaxSize(),
         ) {
             item { LinhaDoQuadro(casa, resumo) }
-            item { SeletorCasa(sites, casa, agora, onEscolherCasa) }
+            // Espaço vazio onde ficava o seletor de casa.
+            item { Spacer(Modifier.height(44.dp)) }
             if (resumo == Resumo.Carregando) {
                 item { EsqueletoZonas() }
                 return@LazyColumn
@@ -542,7 +540,7 @@ private fun EsqueletoZonas() {
 private fun PreviewZonas(casa: Site, pendentes: Set<Comando> = emptySet()) {
     LotusTheme {
         Box(Modifier.background(MaterialTheme.colorScheme.background)) {
-            ZonasTela(listOf(Exemplos.esp, Exemplos.clp), casa, pendentes, {}, {})
+            ZonasTela(casa, pendentes, {})
         }
     }
 }

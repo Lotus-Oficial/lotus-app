@@ -73,6 +73,9 @@ destaque 24; linhas e campos 14; folhas 28. Alvos de toque ≥ 48 dp.
 - **Botão tracejado dourado** para acrescentar algo a uma lista ("Adicionar horário").
 - **Barra de baixo** com ícone, nome e tracinho dourado sob a aba aberta.
 - Logo pequena num quadradinho creme (`LogoPequeno`), para aparecer no tema escuro.
+- **Animação de clima** (prancheta "Animação de clima" e fundo do Início no canvas): sol dourado
+  no canto de cima com raios girando, nuvens passando, e nuvens cinza com gotas na chuva.
+  `FundoClima(tempo)` em `ui/componentes/`, cores em `Lotus.clima`. Só no Início, atrás da lista.
 
 Regras:
 - Tudo como token no tema; nunca cor solta na tela.
@@ -103,7 +106,10 @@ Regras:
 ## Estrutura do app
 
 - **Boas-vindas** (só na primeira abertura) → três abas: **Início**, **Zonas**, **Agenda**.
-- Cada aba tem o **seletor de casa** no topo (pontinho com a situação de cada casa).
+- **Sem seletor de casa** nas abas (pedido da usuária, outubro de 2026): no lugar dele fica um
+  espaço vazio de 44 dp no topo de Início, Zonas e Agenda (no Início, deixa a animação de
+  clima aparecer). Cada APK mostra só a primeira casa de `CASAS`; hoje cada `.env` tem uma casa.
+  `SeletorCasa` continua em `Navegacao.kt`, sem uso, para quando um APK tiver duas casas.
 - Fora do contrato, por isso **fora do app** até existirem: login/conta e "Perfil",
   "Adicionar zona" (as zonas são fixas no quadro), umidade do solo, litros por dia.
   Onde o canvas mostra isso, use chuva, caixa d'água, próxima rega, pressão e vazão.
@@ -149,6 +155,11 @@ Código em `app/src/main/java/com/lotus/`:
 - Nome longo de casa: o seletor e os títulos usam uma linha com reticências.
 - Dias por extenso em datas ("quarta às 06:00"); abreviados só em listas ("seg, qua, sex").
 - Botões dentro do destaque: texto curto ("Parar", não "Parar tudo") para caber em uma linha.
+- Tempo da animação (`tempo(site)` em `ui/Clima.kt`), outubro de 2026: por enquanto só o sensor
+  de chuva (molhado = chuva, seco = sol); fora do ar ou sem sensores, sem animação. "Nublado"
+  espera a previsão do tempo (Open-Meteo, por coordenada da casa), que fica para quando o app
+  tiver internet. A animação é enfeite: o estado continua escrito no cartão "Chuva".
+  Com as animações do Android desligadas, fica parada.
 - Dias marcados da Agenda: círculo lilás (`tertiary`) com letra `onTertiary`, pedido da usuária
   (outubro de 2026). Desmarcado continua branco com borda.
 

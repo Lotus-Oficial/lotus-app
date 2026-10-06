@@ -41,11 +41,11 @@ import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.CartaoDestaque
 import com.lotus.ui.componentes.Esqueleto
+import com.lotus.ui.componentes.FundoClima
 import com.lotus.ui.componentes.EstiloBotao
 import com.lotus.ui.componentes.LogoPequeno
 import com.lotus.ui.componentes.Pilula
 import com.lotus.ui.componentes.PreviewLotus
-import com.lotus.ui.componentes.SeletorCasa
 import com.lotus.ui.componentes.TituloSecao
 import com.lotus.ui.componentes.TracoDourado
 import com.lotus.ui.componentes.agoraMs
@@ -56,6 +56,7 @@ import com.lotus.ui.quandoCurto
 import com.lotus.ui.relogio
 import com.lotus.ui.resumo
 import com.lotus.ui.saudacao
+import com.lotus.ui.tempo
 import com.lotus.ui.tema.Lotus
 import com.lotus.ui.tema.LotusTheme
 import com.lotus.ui.texto
@@ -63,12 +64,11 @@ import com.lotus.ui.texto
 /**
  * Início: a casa escolhida em destaque (próxima irrigação ou o que está regando),
  * chuva e caixa d'água, e as primeiras zonas.
+ * Atrás de tudo, a animação do tempo ([FundoClima]).
  */
 @Composable
 fun InicioTela(
-    sites: List<Site>,
     casa: Site,
-    onEscolherCasa: (Site) -> Unit,
     onVerZonas: () -> Unit,
     modifier: Modifier = Modifier,
     margens: PaddingValues = PaddingValues(),
@@ -77,6 +77,8 @@ fun InicioTela(
     val resumo = resumo(casa, agora)
     // Fundo próprio: dá a cor de texto certa (onBackground) também fora do Scaffold.
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        // Fica parado atrás da lista: o sol no canto, as nuvens no alto.
+        FundoClima(tempo(casa), Modifier.fillMaxSize())
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 24.dp, end = 24.dp,
@@ -87,7 +89,8 @@ fun InicioTela(
             modifier = Modifier.fillMaxSize(),
         ) {
             item { Cabecalho(agora) }
-            item { SeletorCasa(sites, casa, agora, onEscolherCasa) }
+            // Espaço vazio onde ficava o seletor de casa: a troca de casa fica em Zonas e Agenda.
+            item { Spacer(Modifier.height(44.dp)) }
             item { Destaque(casa, resumo, agora, onVerZonas) }
             if (casa.sensores != null) item { Sensores(casa) }
             if (casa.zonas.isNotEmpty()) {
@@ -257,17 +260,23 @@ private fun LinhaZona(zona: Zona, onClick: () -> Unit) {
 @PreviewLotus
 @Composable
 private fun InicioRegandoPreview() {
-    LotusTheme { InicioTela(listOf(Exemplos.esp, Exemplos.clp), Exemplos.esp, {}, {}) }
+    LotusTheme { InicioTela(Exemplos.esp, {}) }
 }
 
 @PreviewLotus
 @Composable
 private fun InicioParadaPreview() {
-    LotusTheme { InicioTela(listOf(Exemplos.esp, Exemplos.clp), Exemplos.clp, {}, {}) }
+    LotusTheme { InicioTela(Exemplos.clp, {}) }
+}
+
+@PreviewLotus
+@Composable
+private fun InicioChuvaPreview() {
+    LotusTheme { InicioTela(Exemplos.chuva, {}) }
 }
 
 @PreviewLotus
 @Composable
 private fun InicioForaDoArPreview() {
-    LotusTheme { InicioTela(listOf(Exemplos.foraDoAr, Exemplos.clp), Exemplos.foraDoAr, {}, {}) }
+    LotusTheme { InicioTela(Exemplos.foraDoAr, {}) }
 }

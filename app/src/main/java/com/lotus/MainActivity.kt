@@ -68,7 +68,8 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
     LaunchedEffect(Unit) { vm.avisos.collect { avisos.showSnackbar(it) } }
 
     var aba by rememberSaveable { mutableStateOf(Aba.Inicio) }
-    var casaId by rememberSaveable { mutableStateOf(CasasDoUsuario.first()) }
+    // Sem seletor de casa: cada APK mostra só a primeira casa do usuário (CASAS no .env).
+    val casaId = CasasDoUsuario.first()
     BackHandler(enabled = aba != Aba.Inicio) { aba = Aba.Inicio }
 
     val casa = sites.first { it.id == casaId }
@@ -87,25 +88,19 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
         ) { atual ->
             when (atual) {
                 Aba.Inicio -> InicioTela(
-                    sites = sites,
                     casa = casa,
-                    onEscolherCasa = { casaId = it.id },
                     onVerZonas = { aba = Aba.Zonas },
                     margens = margens,
                 )
                 Aba.Zonas -> ZonasTela(
-                    sites = sites,
                     casa = casa,
                     pendentes = pendentesDaCasa,
-                    onEscolherCasa = { casaId = it.id },
                     onEnviar = { vm.enviar(casa.id, it) },
                     margens = margens,
                 )
                 Aba.Agenda -> AgendaTela(
-                    sites = sites,
                     casa = casa,
                     salvando = pendentesDaCasa.any { it is Comando.MudarAgenda },
-                    onEscolherCasa = { casaId = it.id },
                     onSalvar = { vm.enviar(casa.id, Comando.MudarAgenda(it)) },
                     margens = margens,
                 )

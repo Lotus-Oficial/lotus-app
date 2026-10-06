@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -57,7 +58,6 @@ import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.FaixaForaDoAr
 import com.lotus.ui.componentes.PreviewLotus
-import com.lotus.ui.componentes.SeletorCasa
 import com.lotus.ui.componentes.TituloSecao
 import com.lotus.ui.componentes.TracoDourado
 import com.lotus.ui.componentes.agoraMs
@@ -79,10 +79,8 @@ private val Semana = listOf(1 to "Segunda", 2 to "Terça", 3 to "Quarta", 4 to "
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgendaTela(
-    sites: List<Site>,
     casa: Site,
     salvando: Boolean,
-    onEscolherCasa: (Site) -> Unit,
     onSalvar: (Agenda) -> Unit,
     modifier: Modifier = Modifier,
     margens: PaddingValues = PaddingValues(),
@@ -117,7 +115,8 @@ fun AgendaTela(
                     TracoDourado()
                 }
             }
-            item { SeletorCasa(sites, casa, agora, onEscolherCasa) }
+            // Espaço vazio onde ficava o seletor de casa.
+            item { Spacer(Modifier.height(44.dp)) }
             if (foraDoAr) item { FaixaForaDoAr(casa.vistoEm) }
 
             item {
@@ -282,7 +281,7 @@ private fun Dia(nome: String, marcado: Boolean, onClick: () -> Unit) {
 private fun AgendaPreview() {
     LotusTheme {
         Box(Modifier.background(MaterialTheme.colorScheme.background)) {
-            AgendaTela(listOf(Exemplos.esp, Exemplos.clp), Exemplos.esp, false, {}, {})
+            AgendaTela(Exemplos.esp, false, {})
         }
     }
 }
@@ -292,7 +291,7 @@ private fun AgendaPreview() {
 private fun AgendaVaziaPreview() {
     LotusTheme {
         Box(Modifier.background(MaterialTheme.colorScheme.background)) {
-            AgendaTela(listOf(Exemplos.esp, Exemplos.agendaVazia), Exemplos.agendaVazia, false, {}, {})
+            AgendaTela(Exemplos.agendaVazia, false, {})
         }
     }
 }
