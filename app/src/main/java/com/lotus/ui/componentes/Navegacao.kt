@@ -41,7 +41,7 @@ import com.lotus.ui.tema.Lotus
 
 enum class Aba(val rotulo: String, val icone: ImageVector) {
     Inicio("Início", Icons.Rounded.Home),
-    Zonas("Zonas", Icons.Rounded.GridView),
+    Zonas("Áreas", Icons.Rounded.GridView),
     Agenda("Agenda", Icons.Rounded.CalendarMonth),
 }
 

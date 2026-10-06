@@ -154,9 +154,9 @@ fun ZonasTela(
             }
             val feitas = zonasFeitas(casa)
             item {
-                TituloSecao(if (feitas != null) "Sequência de agora" else "Zonas", Modifier.padding(top = 4.dp)) {
+                TituloSecao(if (feitas != null) "Sequência de agora" else "Áreas", Modifier.padding(top = 4.dp)) {
                     Text(
-                        if (feitas != null) "$feitas/${casa.zonas.size} feitas" else "${casa.zonas.size} zonas",
+                        if (feitas != null) "$feitas/${casa.zonas.size} feitas" else "${casa.zonas.size} áreas",
                         style = TextoMono,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -222,7 +222,7 @@ private fun zonasFeitas(casa: Site): Int? {
     return if (e.proximaZona == ativa + 1) ativa - 1 else null
 }
 
-/** "ESP32 · 7 zonas" e o pontinho de online, como no topo do canvas. */
+/** "ESP32 · 7 áreas" e o pontinho de online, como no topo do canvas. */
 @Composable
 private fun LinhaDoQuadro(casa: Site, resumo: Resumo) {
     val quadro = when (casa.info?.tipo) {
@@ -234,7 +234,7 @@ private fun LinhaDoQuadro(casa: Site, resumo: Resumo) {
         LogoPequeno(26.dp)
         Spacer(Modifier.width(10.dp))
         Text(
-            quadro + (casa.info?.let { " · ${it.zonas} zonas" } ?: ""),
+            quadro + (casa.info?.let { " · ${it.zonas} áreas" } ?: ""),
             style = TextoMono,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
@@ -261,18 +261,18 @@ private fun confirmacao(comando: Comando, resumo: Resumo): Confirmacao? {
         is Resumo.Pausado -> Triple(resumo.zona, resumo.nomeZona, resumo.restanteS)
         else -> return null
     }
-    val atual = nome ?: "a zona $zona"
+    val atual = nome ?: "a área $zona"
     val falta = restante?.let { ", que ainda tinha ${duracao(it)}" } ?: ""
     return when (comando) {
         Comando.PararTudo -> Confirmacao(
             comando, "Parar tudo?",
-            "$atual para agora$falta. As próximas zonas do ciclo não vão rodar. A agenda continua valendo.",
+            "$atual para agora$falta. As próximas áreas do ciclo não vão rodar. A agenda continua valendo.",
             "Parar tudo",
         )
         is Comando.RegarZona -> if (comando.zona == zona) null else Confirmacao(
-            comando, "Trocar de zona?",
+            comando, "Trocar de área?",
             "Isso interrompe $atual$falta e o resto do ciclo.",
-            "Regar zona ${comando.zona}",
+            "Regar área ${comando.zona}",
         )
         else -> null
     }
@@ -313,7 +313,7 @@ private fun Alertas(site: Site, resumo: Resumo, pendentes: Set<Comando>, onEnvia
         if (site.sensores?.nivel == Nivel.BAIXO && resumo !is Resumo.ComFalha) {
             CartaoAlerta(
                 Icons.Rounded.Warning, "Caixa d'água baixa",
-                "O quadro não abre nenhuma zona até o nível voltar.",
+                "O quadro não abre nenhuma área até o nível voltar.",
                 fundo = MaterialTheme.colorScheme.errorContainer,
                 conteudo = MaterialTheme.colorScheme.onErrorContainer,
             )
@@ -358,7 +358,7 @@ private fun Agora(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(if (pausado) "Pausado" else "Regando agora", style = TextoMono, color = d.rotulo)
                     Text(
-                        "Zona $zona · ${nome ?: ""}".trimEnd(' ', '·'),
+                        "Área $zona · ${nome ?: ""}".trimEnd(' ', '·'),
                         style = MaterialTheme.typography.headlineSmall,
                         color = d.texto,
                     )
@@ -366,8 +366,8 @@ private fun Agora(
                     Text(
                         when {
                             pausado -> "Bomba e válvula desligadas"
-                            proxima != null -> "Depois: ${casa.zona(proxima)?.nome ?: "zona $proxima"}"
-                            else -> "Última zona"
+                            proxima != null -> "Depois: ${casa.zona(proxima)?.nome ?: "área $proxima"}"
+                            else -> "Última área"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = d.textoSuave,

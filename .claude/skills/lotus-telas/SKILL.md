@@ -94,7 +94,10 @@ substituem as antigas). Tokens em `Lotus.vidro` (`CoresVidro`), código em `ui/c
 - Logo pequena num quadradinho creme (`LogoPequeno`), para aparecer no tema escuro.
 - **Animação de clima** (prancheta "Animação de clima" e fundo do Início no canvas): sol dourado
   no canto de cima com raios girando, nuvens passando, e nuvens cinza com gotas na chuva.
-  `FundoClima(tempo)` em `ui/componentes/`, cores em `Lotus.clima`. Só no Início, atrás da lista.
+  `FundoClima(tempo)` em `ui/componentes/`, cores em `Lotus.clima`. No Início, atrás da lista; na
+  Agenda, só as nuvens (no tempo seco) ou nuvens com chuva, nunca o sol.
+- **Gota da caixa d'água** (`GotaDaCaixa`, em `FundoClima.kt`): com água, a gota lilás sobe e desce
+  com um brilho lilás pulsando atrás (2,4 s); baixa, fica parada na cor de erro.
 
 Regras:
 - Tudo como token no tema; nunca cor solta na tela.
@@ -106,7 +109,7 @@ Regras:
 
 - Tudo em **português do Brasil**, tom calmo e direto: "Regando agora", "Próxima irrigação",
   "Sem água na caixa".
-- Fale em termos do quintal, não do hardware: "zona", "ciclo", "agenda", "chuva"; evite
+- Fale em termos do quintal, não do hardware: "área", "ciclo", "agenda", "chuva"; evite
   "relé", "Modbus", "QoS", "payload". Exceção do canvas: a linha mono do topo da aba
   Zonas diz o tipo de quadro ("ESP32", "CLP Delta").
 - Tempos legíveis: `412 s` → "6 min 52 s" ou "6:52" na contagem; `360` → "06:00";
@@ -124,7 +127,7 @@ Regras:
 
 ## Estrutura do app
 
-- **Boas-vindas** (só na primeira abertura) → três abas: **Início**, **Zonas**, **Agenda**.
+- **Boas-vindas** (só na primeira abertura) → três abas: **Início**, **Áreas** (tela `ZonasTela`), **Agenda**.
 - **Sem seletor de casa** nas abas (pedido da usuária, outubro de 2026): no lugar dele fica um
   espaço vazio de 44 dp no topo de Início, Zonas e Agenda (no Início, deixa a animação de
   clima aparecer). Cada APK mostra só a primeira casa de `CASAS`; hoje cada `.env` tem uma casa.
@@ -179,6 +182,8 @@ Código em `app/src/main/java/com/lotus/`:
   espera a previsão do tempo (Open-Meteo, por coordenada da casa), que fica para quando o app
   tiver internet. A animação é enfeite: o estado continua escrito no cartão "Chuva".
   Com as animações do Android desligadas, fica parada.
+- **"Área", não "zona"** em todo texto da tela (pedido da usuária, outubro de 2026): aba "Áreas",
+  "Área 3", "Minhas áreas", "7 áreas". No código e no contrato continua `zona` (`Zona`, `ZonasTela`).
 - Dias marcados da Agenda: círculo lilás (`tertiary`) com letra `onTertiary`, pedido da usuária
   (outubro de 2026). Desmarcado continua branco com borda.
 

@@ -77,7 +77,7 @@ com o app por um broker MQTT na nuvem (EMQX, TLS 8883). Não há API HTTP.
 - **Textos**: tempos, datas e saudação em `ui/Formatos.kt` (fuso fixo `America/Sao_Paulo`, coberto por
   `FormatosTest`); mensagens de erro e falha em `ui/Textos.kt`, sempre em termos do quintal, não do hardware.
 - **Navegação**: `MainActivity.kt` mostra Boas-vindas na primeira abertura (flag em SharedPreferences) e
-  depois três abas (Início, Zonas, Agenda) da casa escolhida, sem biblioteca de navegação.
+  depois três abas (Início, Áreas, Agenda; "área" é o nome que a tela dá à zona do contrato) da casa escolhida, sem biblioteca de navegação.
 - **Nome do usuário nas telas**: vem de `BuildConfig.NOME_USUARIO` (Boas-vindas e cabeçalho do Início).
   Ainda fixos no código: nomes das casas em `SiteId` (`Contrato.kt`) e zonas e agendas do simulador.
 

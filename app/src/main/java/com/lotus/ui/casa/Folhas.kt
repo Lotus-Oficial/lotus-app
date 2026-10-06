@@ -69,7 +69,7 @@ fun ZonaFolha(
 
     ModalBottomSheet(onDismissRequest = onFechar, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)) {
-            Text("Zona ${zona.numero}", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Área ${zona.numero}", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(zona.nome, style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(8.dp))
             TracoDourado(largura = 56.dp)
@@ -98,7 +98,7 @@ fun ZonaFolha(
             )
             if (zona.ligada) {
                 Text(
-                    "Esta zona já está regando.",
+                    "Esta área já está regando.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp),
@@ -109,7 +109,7 @@ fun ZonaFolha(
 
             Text("Tempo no ciclo", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Quanto esta zona rega quando a agenda roda ou você pede para regar tudo.",
+                "Quanto esta área rega quando a agenda roda ou você pede para regar tudo.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

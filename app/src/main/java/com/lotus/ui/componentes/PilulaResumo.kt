@@ -50,9 +50,9 @@ fun Resumo.frase(agoraMs: Long, agora: ZonedDateTime): String = when (this) {
         if (vistoEm != null) "Sem sinal do quadro. Visto ${haQuanto(vistoEm, agoraMs)}." else "Sem sinal do quadro."
     is Resumo.ComFalha -> falha.texto().titulo + "."
     Resumo.Manual -> "Comandado pelo painel. O app só acompanha."
-    is Resumo.Regando -> nomeZona ?: "Zona $zona"
+    is Resumo.Regando -> nomeZona ?: "Área $zona"
     is Resumo.Pausado ->
-        listOfNotNull(nomeZona ?: zona?.let { "Zona $it" }, restanteS?.let { "faltam ${duracao(it)}" })
+        listOfNotNull(nomeZona ?: zona?.let { "Área $it" }, restanteS?.let { "faltam ${duracao(it)}" })
             .joinToString(", ")
     is Resumo.AdiadoPorChuva -> "Agenda suspensa até ${quando(ate, agora)}."
     is Resumo.Parado -> when {

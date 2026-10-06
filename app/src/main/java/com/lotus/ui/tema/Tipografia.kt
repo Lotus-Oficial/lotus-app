@@ -30,7 +30,7 @@ val NunitoSans = FontFamily(
     variavel(R.font.nunito_sans, FontWeight.Bold),
 )
 
-/** Números, horários e rótulos técnicos ("CHUVA", "02:38", "ESP32 · 7 zonas"). */
+/** Números, horários e rótulos técnicos ("CHUVA", "02:38", "ESP32 · 7 áreas"). */
 val PlexMono = FontFamily(
     Font(R.font.ibm_plex_mono_regular, FontWeight.Normal),
     Font(R.font.ibm_plex_mono_medium, FontWeight.Medium),
@@ -69,5 +69,5 @@ val NumeroMedio = TextStyle(fontFamily = PlexMono, fontWeight = FontWeight.SemiB
 /** Rótulo técnico em caixa alta: "CHUVA", "RESTANTE". */
 val RotuloMono = TextStyle(fontFamily = PlexMono, fontWeight = FontWeight.Normal, fontSize = 10.sp, lineHeight = 14.sp, letterSpacing = 1.sp)
 
-/** Linha técnica: "ESP32 · Casa do Fernando · 7 zonas", "12 min". */
+/** Linha técnica: "ESP32 · Casa do Fernando · 7 áreas", "12 min". */
 val TextoMono = TextStyle(fontFamily = PlexMono, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp)
