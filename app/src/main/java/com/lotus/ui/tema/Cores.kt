@@ -136,3 +136,39 @@ internal val EstadoEscuro = CoresDeEstado(
     atencao = TomDeEstado(cor = DouradoClaro, fundo = Color(0xFF45391A), texto = DouradoSuave),
     agua = TomDeEstado(cor = Color(0xFF9CCBD8), fundo = Color(0xFF17404C), texto = Color(0xFFDDE7EA)),
 )
+
+/**
+ * Animação de clima do Início (componente "Animação de clima" do canvas):
+ * sol com raios dourados, nuvens que passam e gotas de chuva.
+ */
+@Immutable
+data class CoresClima(
+    val sol: Color,
+    val bordaSol: Color,
+    val halo: Color,
+    val raio: Color,
+    val nuvens: List<Color>,
+    val nuvensDeChuva: List<Color>,
+    val gota: Color,
+)
+
+internal val ClimaClaro = CoresClima(
+    sol = DouradoClaro,
+    bordaSol = Dourado,
+    halo = DouradoClaro.copy(alpha = 0.9f),
+    raio = DouradoClaro.copy(alpha = 0.8f),
+    nuvens = listOf(Color(0xFFCFC8E0), Color(0xFFDCE3E6), Color(0xFFC7BFDC), Color(0xFFE3E7E8)),
+    nuvensDeChuva = listOf(Color(0xFF8FA6AE), Color(0xFFA3B5BB), Color(0xFF7F98A1), Color(0xFF9AAEB5)),
+    gota = Color(0xFF5F8F9E),
+)
+
+// No escuro os raios e as nuvens ficam discretos, só um pouco mais claros que o fundo.
+internal val ClimaEscuro = CoresClima(
+    sol = DouradoClaro,
+    bordaSol = Dourado,
+    halo = DouradoClaro.copy(alpha = 0.45f),
+    raio = DouradoClaro.copy(alpha = 0.3f),
+    nuvens = listOf(Color(0xFF2E3A5A), Color(0xFF1F4350), Color(0xFF342C4E), Color(0xFF244A56)),
+    nuvensDeChuva = listOf(Color(0xFF2A4A55), Color(0xFF33545F), Color(0xFF274551), Color(0xFF2F505B)),
+    gota = Color(0xFF7FA9B6),
+)

@@ -56,5 +56,6 @@ object Exemplos {
     val pausado = esp.copy(estado = esp.estado!!.copy(modo = Modo.PAUSADO), zonas = esp.zonas.map { it.copy(ligada = false) })
     val adiado = clp.copy(estado = parado.copy(chuvaAte = agora / 1000 + 48 * 3600))
     val manual = clp.copy(estado = parado.copy(modo = Modo.MANUAL))
+    val chuva = clp.copy(sensores = clp.sensores!!.copy(chuva = true))
     val agendaVazia = clp.copy(agenda = Agenda(false, 127, emptyList()))
 }

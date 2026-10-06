@@ -11,6 +11,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.dp
 
 private val LocalCoresDeEstado = staticCompositionLocalOf { EstadoClaro }
+private val LocalCoresClima = staticCompositionLocalOf { ClimaClaro }
 
 // Raios do canvas: 14 (campos, linhas), 20 (cartões), 24 (destaque), 28 (botões e folhas).
 private val Formas = Shapes(
@@ -30,7 +31,10 @@ fun LotusTheme(
     escuro: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    CompositionLocalProvider(LocalCoresDeEstado provides if (escuro) EstadoEscuro else EstadoClaro) {
+    CompositionLocalProvider(
+        LocalCoresDeEstado provides if (escuro) EstadoEscuro else EstadoClaro,
+        LocalCoresClima provides if (escuro) ClimaEscuro else ClimaClaro,
+    ) {
         MaterialTheme(
             colorScheme = if (escuro) CoresEscuras else CoresClaras,
             typography = Tipografia,
@@ -40,10 +44,13 @@ fun LotusTheme(
     }
 }
 
-/** Atalhos: `Lotus.estado.regando.cor`, `Lotus.destaque.fundo`. */
+/** Atalhos: `Lotus.estado.regando.cor`, `Lotus.destaque.fundo`, `Lotus.clima.sol`. */
 object Lotus {
     val estado: CoresDeEstado
         @Composable @ReadOnlyComposable get() = LocalCoresDeEstado.current
 
     val destaque: CoresDestaque get() = Destaque
+
+    val clima: CoresClima
+        @Composable @ReadOnlyComposable get() = LocalCoresClima.current
 }
