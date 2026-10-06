@@ -59,6 +59,7 @@ import com.lotus.ui.Resumo
 import com.lotus.ui.componentes.AnelProgresso
 import com.lotus.ui.componentes.BolhaLilas
 import com.lotus.ui.componentes.BotaoComando
+import com.lotus.ui.componentes.BotaoTracejado
 import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.CartaoAlerta
 import com.lotus.ui.componentes.CartaoDestaque
@@ -89,8 +90,10 @@ import com.lotus.ui.tema.TextoMono
 import com.lotus.ui.texto
 
 /**
- * Aba Zonas: o que está regando agora (anel com a contagem), a sequência das zonas,
+ * Aba Áreas: o que está regando agora (anel com a contagem), a sequência das áreas,
  * e os sensores. [pendentes] são os comandos desta casa esperando `ack`.
+ * [escondidas] são as áreas que a pessoa tirou do app: ficam fora da lista, mas o quadro
+ * continua com elas, e "Adicionar área" as traz de volta.
  */
 @Composable
 fun ZonasTela(
@@ -99,6 +102,9 @@ fun ZonasTela(
     onEnviar: (Comando) -> Unit,
     modifier: Modifier = Modifier,
     margens: PaddingValues = PaddingValues(),
+    escondidas: Set<Int> = emptySet(),
+    onRemoverArea: (zona: Int) -> Unit = {},
+    onAdicionarArea: (zona: Int, nome: String) -> Unit = { _, _ -> },
 ) {
     val agora = agoraMs()
     val resumo = resumo(casa, agora)
@@ -111,7 +117,10 @@ fun ZonasTela(
 
     var zonaAberta by rememberSaveable { mutableStateOf<Int?>(null) }
     var adiarAberto by rememberSaveable { mutableStateOf(false) }
+    var adicionando by rememberSaveable { mutableStateOf(false) }
+    var removendo by rememberSaveable { mutableStateOf<Int?>(null) }
     var confirmar by remember { mutableStateOf<Confirmacao?>(null) }
+    val visiveis = casa.zonas.filterNot { it.numero in escondidas }
 
     /** Comandos que interrompem uma rega pedem confirmação antes. */
     fun pedir(comando: Comando) {
@@ -152,11 +161,12 @@ fun ZonasTela(
                     modifier = esmaecido,
                 )
             }
-            val feitas = zonasFeitas(casa)
+            // Conta só as áreas da lista: as escondidas também rodam no ciclo, mas não aparecem.
+            val feitas = zonasFeitas(casa)?.let { visiveis.count { z -> z.numero < (casa.estado?.zonaAtiva ?: 0) } }
             item {
                 TituloSecao(if (feitas != null) "Sequência de agora" else "Áreas", Modifier.padding(top = 4.dp)) {
                     Text(
-                        if (feitas != null) "$feitas/${casa.zonas.size} feitas" else "${casa.zonas.size} áreas",
+                        if (feitas != null) "$feitas/${visiveis.size} feitas" else "${visiveis.size} áreas",
                         style = TextoMono,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -166,7 +176,15 @@ fun ZonasTela(
             item {
                 Cartao(esmaecido.fillMaxWidth()) {
                     Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        casa.zonas.forEach { zona ->
+                        if (visiveis.isEmpty()) {
+                            Text(
+                                "Nenhuma área no app. Toque em \"Adicionar área\" para trazer de volta as saídas do quadro.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(12.dp),
+                            )
+                        }
+                        visiveis.forEach { zona ->
                             LinhaZona(
                                 zona = zona,
                                 feita = feitas != null && zona.numero < (casa.estado?.zonaAtiva ?: 0),
@@ -178,6 +196,7 @@ fun ZonasTela(
                     }
                 }
             }
+            item { BotaoTracejado("Adicionar área", onClick = { adicionando = true }) }
             item { Sensores(casa, agora, esmaecido.padding(top = 4.dp)) }
         }
     }
@@ -190,7 +209,34 @@ fun ZonasTela(
             pendentes = pendentes,
             onRegar = { duracaoS -> zonaAberta = null; pedir(Comando.RegarZona(zona.numero, duracaoS)) },
             onSalvarPadrao = { s -> onEnviar(Comando.MudarZona(zona.numero, s)) },
+            onRemover = { zonaAberta = null; removendo = zona.numero },
             onFechar = { zonaAberta = null },
+        )
+    }
+    if (adicionando) {
+        AdicionarAreaFolha(
+            livres = casa.zonas.filter { it.numero in escondidas },
+            totalDoQuadro = casa.info?.zonas ?: casa.zonas.size,
+            onAdicionar = { n, nome -> adicionando = false; onAdicionarArea(n, nome) },
+            onFechar = { adicionando = false },
+        )
+    }
+    casa.zona(removendo)?.let { zona ->
+        AlertDialog(
+            onDismissRequest = { removendo = null },
+            title = { Text("Remover ${zona.nome}?") },
+            text = {
+                Text(
+                    "Ela sai da lista do app. O quadro continua com essa saída e, se ela tem válvula, ainda rega " +
+                        "no ciclo por ${duracao(zona.duracaoPadraoS)}. Dá para trazer de volta em \"Adicionar área\".",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { removendo = null; onRemoverArea(zona.numero) }) {
+                    Text("Remover", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { removendo = null }) { Text("Cancelar") } },
         )
     }
     if (adiarAberto) {
@@ -561,3 +607,5 @@ private fun PreviewZonas(casa: Site, pendentes: Set<Comando> = emptySet()) {
 @PreviewLotus @Composable private fun ZonasSemAguaPreview() = PreviewZonas(Exemplos.semAgua)
 @PreviewLotus @Composable private fun ZonasAdiadaPreview() = PreviewZonas(Exemplos.adiado)
 @PreviewLotus @Composable private fun ZonasManualPreview() = PreviewZonas(Exemplos.manual)
+@PreviewLotus @Composable private fun ZonasComEscondidasPreview() =
+    LotusTheme { Box(Modifier.background(MaterialTheme.colorScheme.background)) { ZonasTela(Exemplos.clp, emptySet(), {}, escondidas = setOf(4, 5)) } }

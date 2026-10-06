@@ -1,5 +1,9 @@
 package com.lotus.ui.componentes
 
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.material.icons.rounded.Add
 import android.content.res.Configuration
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -385,5 +389,34 @@ fun LogoPequeno(tamanho: Dp, modifier: Modifier = Modifier) {
             .padding(4.dp),
     ) {
         Image(painterResource(R.drawable.lotus_icone), contentDescription = null, modifier = Modifier.size(tamanho))
+    }
+}
+
+/** O botão tracejado dourado do canvas ("Adicionar horário"), para acrescentar algo a uma lista. */
+@Composable
+fun BotaoTracejado(texto: String, onClick: () -> Unit) {
+    val d = Lotus.destaque
+    val cor = MaterialTheme.colorScheme.onSecondaryContainer
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
+        contentColor = cor,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = d.dourado,
+                    style = Stroke(width = 1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f))),
+                    cornerRadius = CornerRadius(14.dp.toPx()),
+                )
+            },
+    ) {
+        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(12.dp)) {
+            Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(texto, style = MaterialTheme.typography.labelLarge)
+        }
     }
 }

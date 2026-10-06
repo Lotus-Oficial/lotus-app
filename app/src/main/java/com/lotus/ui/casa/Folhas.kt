@@ -3,6 +3,7 @@ package com.lotus.ui.casa
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,14 +11,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Umbrella
 import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
@@ -25,8 +30,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.lotus.dados.Comando
@@ -49,7 +57,7 @@ import com.lotus.ui.tema.NumeroMedio
 
 private val OpcoesDeTempoMin = listOf(5, 10, 15, 30)
 
-/** Folha de uma zona: regar agora por um tempo e mudar o tempo padrão dela no ciclo. */
+/** Folha de uma área: regar agora por um tempo, mudar o tempo padrão dela no ciclo e tirá-la do app. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ZonaFolha(
@@ -59,6 +67,7 @@ fun ZonaFolha(
     pendentes: Set<Comando>,
     onRegar: (duracaoS: Int?) -> Unit,
     onSalvarPadrao: (duracaoS: Int) -> Unit,
+    onRemover: () -> Unit,
     onFechar: () -> Unit,
 ) {
     // null = tempo padrão da zona (o quadro decide, sem mandar durationS)
@@ -136,6 +145,95 @@ fun ZonaFolha(
                 onClick = { onSalvarPadrao(padraoMin * 60) },
                 estilo = EstiloBotao.Contorno,
                 habilitado = habilitado && mudouPadrao,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            HorizontalDivider(Modifier.padding(vertical = 24.dp))
+
+            // Só tira da lista do app (pede confirmação): o quadro não apaga zona.
+            TextButton(
+                onClick = onRemover,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            ) {
+                Icon(Icons.Rounded.Delete, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Remover área do app", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+}
+
+/**
+ * Folha de "Adicionar área": o quadro tem um número fixo de saídas, então adicionar é trazer
+ * de volta uma que a pessoa tirou do app ([livres]), com o nome que ela quiser.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdicionarAreaFolha(
+    livres: List<Zona>,
+    totalDoQuadro: Int,
+    onAdicionar: (zona: Int, nome: String) -> Unit,
+    onFechar: () -> Unit,
+) {
+    var escolhida by rememberSaveable { mutableStateOf(livres.firstOrNull()?.numero) }
+    var nome by rememberSaveable(escolhida) { mutableStateOf(livres.firstOrNull { it.numero == escolhida }?.nome.orEmpty()) }
+
+    ModalBottomSheet(onDismissRequest = onFechar, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)) {
+            Text("Adicionar área", style = MaterialTheme.typography.headlineMedium)
+            Spacer(Modifier.height(8.dp))
+            TracoDourado(largura = 56.dp)
+            Spacer(Modifier.height(12.dp))
+
+            if (livres.isEmpty()) {
+                Text(
+                    "Todas as $totalDoQuadro saídas do quadro já estão no app. Uma área nova precisa de uma " +
+                        "válvula ligada numa saída livre do quadro: fale com quem cuida da instalação.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
+                BotaoComando("Entendi", null, enviando = false, onClick = onFechar, modifier = Modifier.fillMaxWidth(), estilo = EstiloBotao.Contorno)
+                return@Column
+            }
+
+            Text(
+                "Escolha uma saída do quadro que está fora do app. Se ela tem válvula, o quadro já passa por ela no ciclo.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            Column(Modifier.selectableGroup()) {
+                livres.forEach { z ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 56.dp)
+                            .selectable(selected = escolhida == z.numero, onClick = { escolhida = z.numero }, role = Role.RadioButton),
+                    ) {
+                        RadioButton(selected = escolhida == z.numero, onClick = null)
+                        Text("Área ${z.numero} · ${z.nome}", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(start = 16.dp))
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = nome,
+                onValueChange = { nome = it.take(40) },
+                label = { Text("Nome da área") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(16.dp))
+            BotaoComando(
+                texto = "Adicionar",
+                icone = Icons.Rounded.Add,
+                enviando = false,
+                onClick = { escolhida?.let { onAdicionar(it, nome) } },
+                habilitado = escolhida != null,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

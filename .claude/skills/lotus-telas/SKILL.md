@@ -78,7 +78,7 @@ substituem as antigas). Tokens em `Lotus.vidro` (`CoresVidro`), código em `ui/c
   translúcido, texto num cartão petróleo de vidro, "Começar" em `EstiloBotao.DouradoClaro`.
 - Os @Preview e os screenshots não mostram o desfoque (a Haze não roda no layoutlib).
 - Fora do contrato e por isso fora do app, mesmo estando no canvas Liquid Glass: sininho de
-  alertas, aba Perfil, "Adicionar zona", umidade do solo, "Já tenho uma conta" e as abas de casa.
+  alertas, aba Perfil, umidade do solo, "Já tenho uma conta" e as abas de casa.
 
 **Padrões do canvas**:
 - **Cartão de destaque** petróleo com **anel dourado** e **círculo lilás** no canto
@@ -89,7 +89,7 @@ substituem as antigas). Tokens em `Lotus.vidro` (`CoresVidro`), código em `ui/c
 - **Sequência de zonas**: feita = quadradinho lilás com ✓ e "feito"; regando = linha
   petróleo com borda dourada, número em dourado e o tempo; esperando = número cinza e "12 min".
 - **Quadradinhos de sensor** com rótulo mono em caixa alta.
-- **Botão tracejado dourado** para acrescentar algo a uma lista ("Adicionar horário").
+- **Botão tracejado dourado** (`BotaoTracejado`, em `Componentes.kt`) para acrescentar algo a uma lista ("Adicionar horário", "Adicionar área").
 - **Barra de baixo** com ícone, nome e tracinho dourado sob a aba aberta.
 - Logo pequena num quadradinho creme (`LogoPequeno`), para aparecer no tema escuro.
 - **Animação de clima** (prancheta "Animação de clima" e fundo do Início no canvas): sol dourado
@@ -133,7 +133,7 @@ Regras:
   clima aparecer). Cada APK mostra só a primeira casa de `CASAS`; hoje cada `.env` tem uma casa.
   `SeletorCasa` continua em `Navegacao.kt`, sem uso, para quando um APK tiver duas casas.
 - Fora do contrato, por isso **fora do app** até existirem: login/conta e "Perfil",
-  "Adicionar zona" (as zonas são fixas no quadro), umidade do solo, litros por dia.
+  umidade do solo, litros por dia.
   Onde o canvas mostra isso, use chuva, caixa d'água, próxima rega, pressão e vazão.
 - Ações que interrompem (trocar de zona regando, parar tudo) pedem confirmação curta.
 
@@ -182,6 +182,12 @@ Código em `app/src/main/java/com/lotus/`:
   espera a previsão do tempo (Open-Meteo, por coordenada da casa), que fica para quando o app
   tiver internet. A animação é enfeite: o estado continua escrito no cartão "Chuva".
   Com as animações do Android desligadas, fica parada.
+- **Adicionar e remover área** (pedido da usuária, outubro de 2026): o contrato não cria nem apaga
+  zona (cada uma é uma saída do quadro), então é só no app (`dados/AreasDoApp.kt`, SharedPreferences).
+  "Remover área do app" fica no fim da folha da área, em vermelho, com confirmação que avisa que o
+  quadro ainda rega a saída no ciclo. "Adicionar área" (tracejado, embaixo da lista) traz de volta uma
+  saída escondida com o nome escolhido; sem nenhuma livre, explica que precisa de válvula numa saída
+  livre. O nome dado no app vale em todas as telas (`Site.comNomesDoApp`).
 - **"Área", não "zona"** em todo texto da tela (pedido da usuária, outubro de 2026): aba "Áreas",
   "Área 3", "Minhas áreas", "7 áreas". No código e no contrato continua `zona` (`Zona`, `ZonasTela`).
 - Dias marcados da Agenda: círculo lilás (`tertiary`) com letra `onTertiary`, pedido da usuária

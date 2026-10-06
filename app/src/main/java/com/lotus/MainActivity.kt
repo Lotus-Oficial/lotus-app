@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
 private const val PREFS = "lotus"
 private const val BOAS_VINDAS_VISTA = "boas_vindas_vista"
 
-/** Boas-vindas na primeira vez; depois três abas (Início, Zonas, Agenda) da casa escolhida. */
+/** Boas-vindas na primeira vez; depois três abas (Início, Áreas, Agenda) da casa escolhida. */
 @Composable
 private fun LotusApp(vm: LotusViewModel = viewModel()) {
     val prefs = LocalContext.current.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -73,6 +73,7 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
 
     val sites by vm.sites.collectAsStateWithLifecycle()
     val pendentes by vm.pendentes.collectAsStateWithLifecycle()
+    val areas by vm.areas.collectAsStateWithLifecycle()
     val avisos = remember { SnackbarHostState() }
     LaunchedEffect(Unit) { vm.avisos.collect { avisos.showSnackbar(it) } }
 
@@ -83,6 +84,7 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
 
     val casa = sites.first { it.id == casaId }
     val pendentesDaCasa = pendentes.filter { it.site == casaId }.map { it.comando }.toSet()
+    val escondidas = areas[casaId]?.escondidas.orEmpty()
 
     // O fundo de cada tela é o que o vidro (cartões e barra) desfoca.
     val vidro = rememberHazeState()
@@ -107,12 +109,16 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
                         Aba.Inicio -> InicioTela(
                             casa = casa,
                             onVerZonas = { aba = Aba.Zonas },
+                            escondidas = escondidas,
                             margens = margens,
                         )
                         Aba.Zonas -> ZonasTela(
                             casa = casa,
                             pendentes = pendentesDaCasa,
                             onEnviar = { vm.enviar(casa.id, it) },
+                            escondidas = escondidas,
+                            onRemoverArea = { vm.removerArea(casa.id, it) },
+                            onAdicionarArea = { n, nome -> vm.adicionarArea(casa.id, n, nome) },
                             margens = margens,
                         )
                         Aba.Agenda -> AgendaTela(

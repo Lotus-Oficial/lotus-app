@@ -72,6 +72,7 @@ fun InicioTela(
     onVerZonas: () -> Unit,
     modifier: Modifier = Modifier,
     margens: PaddingValues = PaddingValues(),
+    escondidas: Set<Int> = emptySet(),
 ) {
     val agora = agoraMs()
     val resumo = resumo(casa, agora)
@@ -93,13 +94,13 @@ fun InicioTela(
             item { Spacer(Modifier.height(44.dp)) }
             item { Destaque(casa, resumo, agora, onVerZonas) }
             if (casa.sensores != null) item { Sensores(casa) }
-            if (casa.zonas.isNotEmpty()) {
+            if (casa.zonas.any { it.numero !in escondidas }) {
                 item {
                     TituloSecao("Minhas áreas") {
                         TextButton(onClick = onVerZonas) { Text("Ver todas", style = MaterialTheme.typography.labelMedium) }
                     }
                 }
-                items(primeirasZonas(casa.zonas), key = { it.numero }) { zona ->
+                items(primeirasZonas(casa.zonas.filterNot { it.numero in escondidas }), key = { it.numero }) { zona ->
                     LinhaZona(zona, onClick = onVerZonas)
                 }
             }
