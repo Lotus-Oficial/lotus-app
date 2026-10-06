@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.EstiloBotao
 import com.lotus.ui.componentes.PreviewLotus
 import com.lotus.ui.componentes.TracoDourado
+import com.lotus.ui.componentes.bordaDeVidro
 import com.lotus.ui.tema.Lotus
 import com.lotus.ui.tema.LotusTheme
 
@@ -67,7 +69,8 @@ fun BoasVindasTela(onComecar: () -> Unit, modifier: Modifier = Modifier) {
             Box(
                 Modifier
                     .size(208.dp)
-                    .background(d.texto, CircleShape),
+                    .background(d.texto.copy(alpha = 0.72f), CircleShape)
+                    .bordaDeVidro(CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Image(
@@ -79,7 +82,15 @@ fun BoasVindasTela(onComecar: () -> Unit, modifier: Modifier = Modifier) {
 
             Spacer(Modifier.weight(1f))
 
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            // Texto num cartão de vidro petróleo, como no canvas.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(d.fundo.copy(alpha = 0.7f))
+                    .bordaDeVidro(MaterialTheme.shapes.extraLarge)
+                    .padding(24.dp),
+            ) {
                 Text("${BuildConfig.NOME_USUARIO}, boas-vindas ao", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 22.sp), color = d.texto)
                 Text("projeto Lótus", style = MaterialTheme.typography.headlineLarge, color = d.texto)
                 TracoDourado(largura = 96.dp)
@@ -92,13 +103,13 @@ fun BoasVindasTela(onComecar: () -> Unit, modifier: Modifier = Modifier) {
                 )
             }
 
-            Spacer(Modifier.size(40.dp))
+            Spacer(Modifier.size(20.dp))
             BotaoComando(
                 texto = "Começar",
                 icone = null,
                 enviando = false,
                 onClick = onComecar,
-                estilo = EstiloBotao.Dourado,
+                estilo = EstiloBotao.DouradoClaro,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

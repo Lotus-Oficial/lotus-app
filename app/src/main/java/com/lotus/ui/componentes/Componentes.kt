@@ -114,7 +114,7 @@ fun Pilula(
     }
 }
 
-/** Cartão branco com borda fina, como os do canvas. */
+/** Cartão de vidro (Liquid Glass do canvas): translúcido, com borda clara. */
 @Composable
 fun Cartao(
     modifier: Modifier = Modifier,
@@ -122,12 +122,11 @@ fun Cartao(
     forma: Shape = MaterialTheme.shapes.medium,
     conteudo: @Composable () -> Unit,
 ) {
-    val borda = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    val cor = MaterialTheme.colorScheme.surfaceContainerLowest
+    val m = modifier.vidro(forma)
     if (onClick != null) {
-        Surface(onClick = onClick, color = cor, shape = forma, border = borda, modifier = modifier, content = conteudo)
+        Surface(onClick = onClick, color = Color.Transparent, shape = forma, modifier = m, content = conteudo)
     } else {
-        Surface(color = cor, shape = forma, border = borda, modifier = modifier, content = conteudo)
+        Surface(color = Color.Transparent, shape = forma, modifier = m, content = conteudo)
     }
 }
 
@@ -157,7 +156,8 @@ fun CartaoDestaque(
         modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
-            .background(d.fundo),
+            .background(d.fundo)
+            .bordaDeVidro(MaterialTheme.shapes.large),
     ) {
         Enfeite(anel)
         Column(Modifier.padding(horizontal = 24.dp, vertical = 22.dp), content = conteudo)
@@ -294,8 +294,10 @@ fun Esqueleto(modifier: Modifier = Modifier, forma: Shape = MaterialTheme.shapes
 enum class EstiloBotao {
     /** Petróleo cheio: ação principal ("Entrar", "Salvar agenda"). */
     Principal,
-    /** Dourado cheio: chamada de destaque ("Começar", "Ver detalhes", "Regar tudo"). */
+    /** Dourado cheio: chamada de destaque ("Ver detalhes", "Regar tudo"). */
     Dourado,
+    /** Dourado claro com borda de vidro: o "Começar" da Boas-vindas. */
+    DouradoClaro,
     /** Só contorno petróleo ("Cancelar", "Parar tudo"). */
     Contorno,
     /** Contorno dourado claro, para usar em cima do cartão petróleo ("Pausar"). */
@@ -331,7 +333,17 @@ fun BotaoComando(
     val pilula = CircleShape
     val espaco = PaddingValues(horizontal = 18.dp, vertical = 8.dp)
     when (estilo) {
-        EstiloBotao.Principal -> Button(onClick, m, enabled = ativo, shape = pilula, contentPadding = espaco) { conteudo() }
+        // Desligado ("Agenda salva") vira vidro, como no canvas.
+        EstiloBotao.Principal -> Button(
+            onClick, if (ativo) m.bordaDeVidro(pilula) else m.vidro(pilula), enabled = ativo, shape = pilula,
+            colors = ButtonDefaults.buttonColors(disabledContainerColor = Color.Transparent, disabledContentColor = cs.onSurfaceVariant),
+            contentPadding = espaco,
+        ) { conteudo() }
+        EstiloBotao.DouradoClaro -> Button(
+            onClick, m.bordaDeVidro(pilula), enabled = ativo, shape = pilula,
+            colors = ButtonDefaults.buttonColors(containerColor = d.rotulo.copy(alpha = 0.94f), contentColor = d.sobreDourado),
+            contentPadding = espaco,
+        ) { conteudo() }
         EstiloBotao.Dourado -> Button(
             onClick, m, enabled = ativo, shape = pilula,
             colors = ButtonDefaults.buttonColors(containerColor = d.dourado, contentColor = d.sobreDourado,

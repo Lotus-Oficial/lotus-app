@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -45,47 +45,48 @@ enum class Aba(val rotulo: String, val icone: ImageVector) {
     Agenda("Agenda", Icons.Rounded.CalendarMonth),
 }
 
-/** Barra de baixo do canvas: ícone, nome e o tracinho dourado sob a aba aberta. */
+/** Espaço que as telas deixam embaixo para o conteúdo não terminar escondido atrás da barra. */
+val EspacoDaBarra = 70.dp + 22.dp + 16.dp
+
+/**
+ * Barra de baixo Liquid Glass do canvas: pílula de vidro flutuando sobre o conteúdo,
+ * com a aba aberta numa pílula petróleo.
+ */
 @Composable
 fun BarraNavegacao(atual: Aba, onEscolher: (Aba) -> Unit, modifier: Modifier = Modifier) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainerLowest, modifier = modifier) {
-        Column {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(top = 6.dp, bottom = 8.dp).selectableGroup(),
+    val cs = MaterialTheme.colorScheme
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+            .padding(start = 18.dp, end = 18.dp, bottom = 22.dp)
+            .fillMaxWidth()
+            .height(70.dp)
+            .vidro(RoundedCornerShape(35.dp), Lotus.vidro.barra, opaco = true)
+            .padding(6.dp)
+            .selectableGroup(),
+    ) {
+        Aba.entries.forEach { aba ->
+            val selecionada = aba == atual
+            val forma = RoundedCornerShape(29.dp)
+            val cor = if (selecionada) cs.onPrimary else cs.primary
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(forma)
+                    .then(if (selecionada) Modifier.background(cs.primary).bordaDeVidro(forma) else Modifier)
+                    .selectable(selected = selecionada, onClick = { onEscolher(aba) }, role = Role.Tab),
             ) {
-                Aba.entries.forEach { aba ->
-                    val selecionada = aba == atual
-                    val cor = if (selecionada) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .width(80.dp)
-                            .heightIn(min = 56.dp)
-                            .selectable(selected = selecionada, onClick = { onEscolher(aba) }, role = Role.Tab)
-                            .padding(top = 6.dp),
-                    ) {
-                        Icon(aba.icone, contentDescription = null, tint = cor)
-                        Text(
-                            aba.rotulo,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (selecionada) FontWeight.Bold else FontWeight.SemiBold,
-                            ),
-                            color = cor,
-                        )
-                        Spacer(
-                            Modifier
-                                .width(18.dp)
-                                .height(3.dp)
-                                .background(
-                                    if (selecionada) Lotus.destaque.dourado else MaterialTheme.colorScheme.surfaceContainerLowest,
-                                    RoundedCornerShape(2.dp),
-                                ),
-                        )
-                    }
-                }
+                Icon(aba.icone, contentDescription = null, tint = cor, modifier = Modifier.size(22.dp))
+                Text(
+                    aba.rotulo,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = if (selecionada) FontWeight.Bold else FontWeight.SemiBold,
+                    ),
+                    color = cor,
+                )
             }
         }
     }

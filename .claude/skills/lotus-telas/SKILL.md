@@ -45,7 +45,7 @@ claro e escuro). Telas novas devem parecer da mesma família que essas.
 | **Lilás** | `#B3A4D6` | Pílula "Irrigando", zona feita (✓), círculo de enfeite, caixa d'água, dias marcados da Agenda |
 | Lilás suave / texto | `#E6E0F3` / `#5A4A8A`, sobre lilás `#2E2347` | Texto e fundos lilases |
 | Texto secundário | `#3E5A63`, `#5B7178` | Legendas, rótulos |
-| Bordas | `#E6E2D8` (cartões), `#C9D3D6` (campos) | Cartões brancos com 1 dp de borda |
+| Bordas | `#E6E2D8`, `#C9D3D6` (campos) | Campos e pílulas de contorno; os cartões são de vidro (veja Liquid Glass) |
 | Verde | `#2E9D6B` | Só "online" e "tudo certo" |
 
 **Tema escuro** (o canvas só tem o claro; derivado dele): fundo `#0C1F25`, cartões
@@ -58,8 +58,27 @@ claro e escuro). Telas novas devem parecer da mesma família que essas.
 - **IBM Plex Mono**: números e rótulos técnicos — contagem regressiva, horários,
   "CHUVA", "RESTANTE", "ESP32 · 7 zonas", "2/7 feitas", "12 min".
 
-**Formas**: botões em pílula (altura 56, ou 44 dentro do destaque); cartões com cantos 20;
-destaque 24; linhas e campos 14; folhas 28. Alvos de toque ≥ 48 dp.
+**Formas**: botões em pílula (altura 56, ou 44 dentro do destaque); cartões com cantos 22;
+destaque 26; linhas de horário 18; linhas e campos 14; folhas 28. Alvos de toque ≥ 48 dp.
+
+**Liquid Glass** (outubro de 2026, pedido da usuária: as telas "— Liquid Glass" do canvas
+substituem as antigas). Tokens em `Lotus.vidro` (`CoresVidro`), código em `ui/componentes/Vidro.kt`:
+- `Modifier.vidro(forma)`: branco 50% (escuro: petróleo translúcido) sobre o fundo desfocado
+  pela biblioteca Haze (1.7.2; a 2.x exige Kotlin 2.4), borda clara e brilho na borda de cima.
+  Desfoque só no Android 12+; antes fica só translúcido. `Cartao` já é vidro.
+- `Modifier.bordaDeVidro(forma)`: a mesma borda em superfícies cheias (destaque, aba aberta,
+  dia marcado, botão principal).
+- O que o vidro desfoca é o fundo de cada tela, marcado com `fonteDoVidro()`: o clima no Início;
+  a `BolhaLilas` (círculo lilás que boia) em Zonas e Agenda; na Agenda também nuvens/chuva
+  (sol não), anel dourado e círculo lilás no canto. O `HazeState` vem de `LocalVidro` (`LotusApp`).
+- Barra de baixo: pílula de vidro flutuando sobre o conteúdo (`opaco = true`, para a lista
+  nunca aparecer nítida por baixo), aba aberta numa pílula `primary`. As telas deixam
+  `EspacoDaBarra` embaixo.
+- Zonas: a sequência inteira num cartão de vidro só. Boas-vindas: logo num círculo creme
+  translúcido, texto num cartão petróleo de vidro, "Começar" em `EstiloBotao.DouradoClaro`.
+- Os @Preview e os screenshots não mostram o desfoque (a Haze não roda no layoutlib).
+- Fora do contrato e por isso fora do app, mesmo estando no canvas Liquid Glass: sininho de
+  alertas, aba Perfil, "Adicionar zona", umidade do solo, "Já tenho uma conta" e as abas de casa.
 
 **Padrões do canvas**:
 - **Cartão de destaque** petróleo com **anel dourado** e **círculo lilás** no canto

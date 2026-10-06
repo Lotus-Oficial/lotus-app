@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -58,6 +57,7 @@ import com.lotus.dados.Zona
 import com.lotus.ui.Exemplos
 import com.lotus.ui.Resumo
 import com.lotus.ui.componentes.AnelProgresso
+import com.lotus.ui.componentes.BolhaLilas
 import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.CartaoAlerta
@@ -71,6 +71,7 @@ import com.lotus.ui.componentes.PreviewLotus
 import com.lotus.ui.componentes.TituloSecao
 import com.lotus.ui.componentes.TracoDourado
 import com.lotus.ui.componentes.agoraMs
+import com.lotus.ui.componentes.fonteDoVidro
 import com.lotus.ui.duracao
 import com.lotus.ui.emCasa
 import com.lotus.ui.hora
@@ -121,6 +122,7 @@ fun ZonasTela(
     val esmaecido = Modifier.alpha(if (resumo is Resumo.ForaDoAr) 0.55f else 1f)
     // Fundo próprio: dá a cor de texto certa (onBackground) também fora do Scaffold.
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box(Modifier.fillMaxSize().fonteDoVidro()) { BolhaLilas(x = -80, y = 300) }
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 20.dp, end = 20.dp,
@@ -160,15 +162,21 @@ fun ZonasTela(
                     )
                 }
             }
-            items(casa.zonas, key = { it.numero }) { zona ->
-                LinhaZona(
-                    zona = zona,
-                    feita = feitas != null && zona.numero < (casa.estado?.zonaAtiva ?: 0),
-                    restanteS = (ultimoEstado as? Resumo.Regando)?.restanteS ?: (ultimoEstado as? Resumo.Pausado)?.restanteS,
-                    enviando = pendentes.any { it is Comando.RegarZona && it.zona == zona.numero },
-                    onAbrir = { zonaAberta = zona.numero },
-                    modifier = esmaecido,
-                )
+            // A sequência inteira num cartão de vidro só, como no canvas.
+            item {
+                Cartao(esmaecido.fillMaxWidth()) {
+                    Column(Modifier.padding(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        casa.zonas.forEach { zona ->
+                            LinhaZona(
+                                zona = zona,
+                                feita = feitas != null && zona.numero < (casa.estado?.zonaAtiva ?: 0),
+                                restanteS = (ultimoEstado as? Resumo.Regando)?.restanteS ?: (ultimoEstado as? Resumo.Pausado)?.restanteS,
+                                enviando = pendentes.any { it is Comando.RegarZona && it.zona == zona.numero },
+                                onAbrir = { zonaAberta = zona.numero },
+                            )
+                        }
+                    }
+                }
             }
             item { Sensores(casa, agora, esmaecido.padding(top = 4.dp)) }
         }

@@ -12,13 +12,14 @@ import androidx.compose.ui.unit.dp
 
 private val LocalCoresDeEstado = staticCompositionLocalOf { EstadoClaro }
 private val LocalCoresClima = staticCompositionLocalOf { ClimaClaro }
+private val LocalCoresVidro = staticCompositionLocalOf { VidroClaro }
 
-// Raios do canvas: 14 (campos, linhas), 20 (cartões), 24 (destaque), 28 (botões e folhas).
+// Raios do canvas Liquid Glass: 14 (campos, linhas), 22 (cartões), 26 (destaque), 28 (botões e folhas).
 private val Formas = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
     small = RoundedCornerShape(14.dp),
-    medium = RoundedCornerShape(20.dp),
-    large = RoundedCornerShape(24.dp),
+    medium = RoundedCornerShape(22.dp),
+    large = RoundedCornerShape(26.dp),
     extraLarge = RoundedCornerShape(28.dp),
 )
 
@@ -34,6 +35,7 @@ fun LotusTheme(
     CompositionLocalProvider(
         LocalCoresDeEstado provides if (escuro) EstadoEscuro else EstadoClaro,
         LocalCoresClima provides if (escuro) ClimaEscuro else ClimaClaro,
+        LocalCoresVidro provides if (escuro) VidroEscuro else VidroClaro,
     ) {
         MaterialTheme(
             colorScheme = if (escuro) CoresEscuras else CoresClaras,
@@ -44,7 +46,7 @@ fun LotusTheme(
     }
 }
 
-/** Atalhos: `Lotus.estado.regando.cor`, `Lotus.destaque.fundo`, `Lotus.clima.sol`. */
+/** Atalhos: `Lotus.estado.regando.cor`, `Lotus.destaque.fundo`, `Lotus.clima.sol`, `Lotus.vidro.fundo`. */
 object Lotus {
     val estado: CoresDeEstado
         @Composable @ReadOnlyComposable get() = LocalCoresDeEstado.current
@@ -53,4 +55,7 @@ object Lotus {
 
     val clima: CoresClima
         @Composable @ReadOnlyComposable get() = LocalCoresClima.current
+
+    val vidro: CoresVidro
+        @Composable @ReadOnlyComposable get() = LocalCoresVidro.current
 }

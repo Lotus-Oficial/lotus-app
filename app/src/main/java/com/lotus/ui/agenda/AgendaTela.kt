@@ -1,7 +1,7 @@
 package com.lotus.ui.agenda
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,15 +9,18 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
@@ -43,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
@@ -54,16 +58,23 @@ import androidx.compose.ui.unit.dp
 import com.lotus.dados.Agenda
 import com.lotus.dados.Site
 import com.lotus.ui.Exemplos
+import com.lotus.ui.Tempo
+import com.lotus.ui.componentes.BolhaLilas
 import com.lotus.ui.componentes.BotaoComando
 import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.FaixaForaDoAr
+import com.lotus.ui.componentes.FundoClima
 import com.lotus.ui.componentes.PreviewLotus
 import com.lotus.ui.componentes.TituloSecao
 import com.lotus.ui.componentes.TracoDourado
 import com.lotus.ui.componentes.agoraMs
+import com.lotus.ui.componentes.bordaDeVidro
+import com.lotus.ui.componentes.fonteDoVidro
+import com.lotus.ui.componentes.vidro
 import com.lotus.ui.dias
 import com.lotus.ui.duracao
 import com.lotus.ui.hora
+import com.lotus.ui.tempo
 import com.lotus.ui.tema.Lotus
 import com.lotus.ui.tema.LotusTheme
 import com.lotus.ui.tema.NumeroMedio
@@ -100,6 +111,7 @@ fun AgendaTela(
 
     // Fundo próprio: dá a cor de texto certa (onBackground) também fora do Scaffold.
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        FundoAgenda(tempo(casa))
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 24.dp, end = 24.dp,
@@ -166,9 +178,9 @@ fun AgendaTela(
                 }
             }
             items(inicios, key = { it }) { inicio ->
-                Cartao(Modifier.fillMaxWidth(), forma = MaterialTheme.shapes.small) {
+                Cartao(Modifier.fillMaxWidth(), forma = RoundedCornerShape(18.dp)) {
                     Row(
-                        Modifier.heightIn(min = 60.dp).padding(start = 16.dp, end = 4.dp),
+                        Modifier.heightIn(min = 56.dp).padding(start = 16.dp, end = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(Icons.Rounded.Schedule, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -225,7 +237,34 @@ fun AgendaTela(
     }
 }
 
-/** O botão tracejado dourado do canvas ("Adicionar zona"), para acrescentar algo a uma lista. */
+/**
+ * Fundo da Agenda Liquid Glass: bolha lilás à esquerda, nuvens ou chuva no alto quando o tempo
+ * pede (o sol fica só no Início), e o anel dourado com o círculo lilás no canto de cima.
+ */
+@Composable
+private fun FundoAgenda(tempo: Tempo?) {
+    val d = Lotus.destaque
+    Box(Modifier.fillMaxSize().fonteDoVidro()) {
+        BolhaLilas(x = -90, y = 330)
+        FundoClima(tempo.takeIf { it != Tempo.SOL }, Modifier.fillMaxWidth().fillMaxHeight(0.5f))
+        Spacer(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = (-52).dp, y = 18.dp)
+                .size(96.dp)
+                .border(5.dp, d.dourado, CircleShape),
+        )
+        Spacer(
+            Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = 44.dp, y = (-38).dp)
+                .size(130.dp)
+                .background(d.lilas, CircleShape),
+        )
+    }
+}
+
+/** O botão tracejado dourado do canvas ("Adicionar horário"), para acrescentar algo a uma lista. */
 @Composable
 private fun BotaoTracejado(texto: String, onClick: () -> Unit) {
     val d = Lotus.destaque
@@ -233,7 +272,7 @@ private fun BotaoTracejado(texto: String, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
-        color = d.dourado.copy(alpha = 0.12f),
+        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.65f),
         contentColor = cor,
         modifier = Modifier
             .fillMaxWidth()
@@ -254,17 +293,19 @@ private fun BotaoTracejado(texto: String, onClick: () -> Unit) {
     }
 }
 
-/** Dia da semana como um círculo: lilás quando a agenda roda nele. */
+/** Dia da semana como um círculo: lilás quando a agenda roda nele, vidro quando não. */
 @Composable
 private fun Dia(nome: String, marcado: Boolean, onClick: () -> Unit) {
     val cs = MaterialTheme.colorScheme
     Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = if (marcado) cs.tertiary else cs.surfaceContainerLowest,
-        contentColor = if (marcado) cs.onTertiary else cs.onSurfaceVariant,
-        border = if (marcado) null else BorderStroke(1.5.dp, cs.outlineVariant),
-        modifier = Modifier.size(42.dp).semantics {
+        color = if (marcado) cs.tertiary.copy(alpha = 0.9f) else Color.Transparent,
+        contentColor = if (marcado) cs.onTertiary else cs.primary,
+        modifier = Modifier
+            .size(44.dp)
+            .then(if (marcado) Modifier.bordaDeVidro(CircleShape) else Modifier.vidro(CircleShape))
+            .semantics {
             contentDescription = nome
             selected = marcado
             role = Role.Checkbox

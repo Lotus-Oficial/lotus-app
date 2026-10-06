@@ -42,6 +42,7 @@ import com.lotus.ui.componentes.Cartao
 import com.lotus.ui.componentes.CartaoDestaque
 import com.lotus.ui.componentes.Esqueleto
 import com.lotus.ui.componentes.FundoClima
+import com.lotus.ui.componentes.fonteDoVidro
 import com.lotus.ui.componentes.EstiloBotao
 import com.lotus.ui.componentes.LogoPequeno
 import com.lotus.ui.componentes.Pilula
@@ -78,7 +79,7 @@ fun InicioTela(
     // Fundo próprio: dá a cor de texto certa (onBackground) também fora do Scaffold.
     Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         // Fica parado atrás da lista: o sol no canto, as nuvens no alto.
-        FundoClima(tempo(casa), Modifier.fillMaxSize())
+        FundoClima(tempo(casa), Modifier.fillMaxSize().fonteDoVidro())
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 24.dp, end = 24.dp,

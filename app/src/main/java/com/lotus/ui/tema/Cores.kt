@@ -150,16 +150,18 @@ data class CoresClima(
     val nuvens: List<Color>,
     val nuvensDeChuva: List<Color>,
     val gota: Color,
+    val reflexo: Color,   // brilho em cruz sobre o sol
 )
 
 internal val ClimaClaro = CoresClima(
     sol = DouradoClaro,
     bordaSol = Dourado,
     halo = DouradoClaro.copy(alpha = 0.9f),
-    raio = DouradoClaro.copy(alpha = 0.8f),
+    raio = DouradoClaro.copy(alpha = 0.63f),
     nuvens = listOf(Color(0xFFCFC8E0), Color(0xFFDCE3E6), Color(0xFFC7BFDC), Color(0xFFE3E7E8)),
     nuvensDeChuva = listOf(Color(0xFF8FA6AE), Color(0xFFA3B5BB), Color(0xFF7F98A1), Color(0xFF9AAEB5)),
     gota = Color(0xFF5F8F9E),
+    reflexo = Color(0xFFFFF6D6).copy(alpha = 0.95f),
 )
 
 // No escuro os raios e as nuvens ficam discretos, só um pouco mais claros que o fundo.
@@ -171,4 +173,41 @@ internal val ClimaEscuro = CoresClima(
     nuvens = listOf(Color(0xFF2E3A5A), Color(0xFF1F4350), Color(0xFF342C4E), Color(0xFF244A56)),
     nuvensDeChuva = listOf(Color(0xFF2A4A55), Color(0xFF33545F), Color(0xFF274551), Color(0xFF2F505B)),
     gota = Color(0xFF7FA9B6),
+    reflexo = Color(0xFFFFF6D6).copy(alpha = 0.5f),
+)
+
+/**
+ * Liquid Glass (telas "— Liquid Glass" do canvas): superfícies translúcidas que desfocam o que
+ * está atrás, com borda clara e um brilho na borda de cima. [bolha] é o círculo lilás do fundo.
+ */
+@Immutable
+data class CoresVidro(
+    val fundo: Color,          // cartões
+    val barra: Color,          // barra de baixo, um pouco mais opaca
+    val borda: Color,
+    val brilho: Color,         // borda de cima, mais clara
+    val bolha: Color,
+    val bordaDestaque: Color,  // cartão petróleo e botões cheios
+    val brilhoDestaque: Color,
+)
+
+internal val VidroClaro = CoresVidro(
+    fundo = Color.White.copy(alpha = 0.5f),
+    barra = Color.White.copy(alpha = 0.55f),
+    borda = Color.White.copy(alpha = 0.85f),
+    brilho = Color.White.copy(alpha = 0.95f),
+    bolha = Lilas.copy(alpha = 0.75f),
+    bordaDestaque = Color.White.copy(alpha = 0.45f),
+    brilhoDestaque = Color.White.copy(alpha = 0.6f),
+)
+
+// No escuro o vidro é petróleo translúcido, mais claro que o fundo, com borda bem discreta.
+internal val VidroEscuro = CoresVidro(
+    fundo = Color(0xFF1B3D48).copy(alpha = 0.55f),
+    barra = Color(0xFF1B3D48).copy(alpha = 0.72f),
+    borda = Color.White.copy(alpha = 0.12f),
+    brilho = Color.White.copy(alpha = 0.28f),
+    bolha = Color(0xFF3B3158).copy(alpha = 0.9f),
+    bordaDestaque = Color.White.copy(alpha = 0.22f),
+    brilhoDestaque = Color.White.copy(alpha = 0.4f),
 )

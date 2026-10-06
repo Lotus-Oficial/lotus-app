@@ -18,6 +18,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
@@ -65,7 +68,7 @@ private val AlturaNuvens = 422.dp
 
 /** Segundos desde que a animação apareceu; lido só no desenho, então não recompõe a tela. */
 @Composable
-private fun relogioDaAnimacao(): State<Float> {
+internal fun relogioDaAnimacao(): State<Float> {
     val segundos = remember { mutableFloatStateOf(0f) }
     val contexto = LocalContext.current
     val desligadas = remember(contexto) {
@@ -95,11 +98,12 @@ private fun entre(de: Float, ate: Float, f: Float) = de + (ate - de) * f
 
 @Composable
 private fun Sol(cores: CoresClima, relogio: State<Float>, modifier: Modifier) {
-    Canvas(modifier) {
+    // Liquid Glass: sol e raios levemente desfocados (só Android 12+; antes fica nítido).
+    Canvas(modifier.blur(5.dp, BlurredEdgeTreatment.Unbounded)) {
         val t = relogio.value
         // Sol meio escondido no canto de cima, à direita.
         val centro = Offset(size.width + 15.dp.toPx(), -25.dp.toPx())
-        val alcance = 530.dp.toPx()
+        val alcance = 760.dp.toPx()
         val raios = Brush.radialGradient(
             0.18f to cores.raio,
             0.55f to cores.raio.copy(alpha = cores.raio.alpha * 0.6f),
@@ -130,6 +134,27 @@ private fun Sol(cores: CoresClima, relogio: State<Float>, modifier: Modifier) {
         )
         drawCircle(cores.bordaSol, 62.dp.toPx(), centro)
         drawCircle(cores.sol, 56.dp.toPx(), centro)
+        // Reflexo em cruz sobre o sol, que brilha devagar.
+        reflexo(centro, 280.dp.toPx(), 4.dp.toPx(), cores.reflexo, 0.4f + 0.6f * pulso(t, 5f))
+        reflexo(centro, 4.dp.toPx(), 125.dp.toPx(), cores.reflexo, 0.4f + 0.6f * pulso(t + 2f, 6f))
+    }
+}
+
+/** Elipse de luz de raios [rx] × [ry], mais forte no meio. */
+private fun DrawScope.reflexo(centro: Offset, rx: Float, ry: Float, cor: Color, alfa: Float) {
+    val r = maxOf(rx, ry)
+    scale(rx / r, ry / r, pivot = centro) {
+        drawCircle(
+            Brush.radialGradient(
+                0f to cor.copy(alpha = cor.alpha * alfa),
+                0.3f to cor.copy(alpha = cor.alpha * alfa * 0.55f),
+                0.7f to Color.Transparent,
+                center = centro,
+                radius = r,
+            ),
+            radius = r,
+            center = centro,
+        )
     }
 }
 

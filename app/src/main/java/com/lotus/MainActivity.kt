@@ -10,20 +10,26 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,8 +41,11 @@ import com.lotus.ui.boasvindas.BoasVindasTela
 import com.lotus.ui.casa.ZonasTela
 import com.lotus.ui.componentes.Aba
 import com.lotus.ui.componentes.BarraNavegacao
+import com.lotus.ui.componentes.EspacoDaBarra
+import com.lotus.ui.componentes.LocalVidro
 import com.lotus.ui.inicio.InicioTela
 import com.lotus.ui.tema.LotusTheme
+import dev.chrisbanes.haze.rememberHazeState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,34 +84,49 @@ private fun LotusApp(vm: LotusViewModel = viewModel()) {
     val casa = sites.first { it.id == casaId }
     val pendentesDaCasa = pendentes.filter { it.site == casaId }.map { it.comando }.toSet()
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = { BarraNavegacao(aba, onEscolher = { aba = it }) },
-        snackbarHost = { SnackbarHost(avisos) },
-    ) { margens ->
-        AnimatedContent(
-            targetState = aba,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "abas",
-            modifier = Modifier.fillMaxSize(),
-        ) { atual ->
-            when (atual) {
-                Aba.Inicio -> InicioTela(
-                    casa = casa,
-                    onVerZonas = { aba = Aba.Zonas },
-                    margens = margens,
-                )
-                Aba.Zonas -> ZonasTela(
-                    casa = casa,
-                    pendentes = pendentesDaCasa,
-                    onEnviar = { vm.enviar(casa.id, it) },
-                    margens = margens,
-                )
-                Aba.Agenda -> AgendaTela(
-                    casa = casa,
-                    salvando = pendentesDaCasa.any { it is Comando.MudarAgenda },
-                    onSalvar = { vm.enviar(casa.id, Comando.MudarAgenda(it)) },
-                    margens = margens,
+    // O fundo de cada tela é o que o vidro (cartões e barra) desfoca.
+    val vidro = rememberHazeState()
+    CompositionLocalProvider(LocalVidro provides vidro) {
+        Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            snackbarHost = { SnackbarHost(avisos, Modifier.padding(bottom = EspacoDaBarra - 16.dp)) },
+        ) { sistema ->
+            // A barra flutua sobre o conteúdo: as telas deixam espaço para ela embaixo.
+            val margens = PaddingValues(
+                top = sistema.calculateTopPadding(),
+                bottom = sistema.calculateBottomPadding() + EspacoDaBarra,
+            )
+            Box(Modifier.fillMaxSize()) {
+                AnimatedContent(
+                    targetState = aba,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "abas",
+                    modifier = Modifier.fillMaxSize(),
+                ) { atual ->
+                    when (atual) {
+                        Aba.Inicio -> InicioTela(
+                            casa = casa,
+                            onVerZonas = { aba = Aba.Zonas },
+                            margens = margens,
+                        )
+                        Aba.Zonas -> ZonasTela(
+                            casa = casa,
+                            pendentes = pendentesDaCasa,
+                            onEnviar = { vm.enviar(casa.id, it) },
+                            margens = margens,
+                        )
+                        Aba.Agenda -> AgendaTela(
+                            casa = casa,
+                            salvando = pendentesDaCasa.any { it is Comando.MudarAgenda },
+                            onSalvar = { vm.enviar(casa.id, Comando.MudarAgenda(it)) },
+                            margens = margens,
+                        )
+                    }
+                }
+                BarraNavegacao(
+                    aba,
+                    onEscolher = { aba = it },
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = sistema.calculateBottomPadding()),
                 )
             }
         }
