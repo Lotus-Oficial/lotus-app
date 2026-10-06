@@ -188,7 +188,8 @@ fun AgendaTela(
                 item {
                     Text(
                         "Cada rega passa pelas ${casa.zonas.size} zonas, uma depois da outra: " +
-                            "cerca de ${duracao(cicloS)} no total. Ela é pulada se estiver chovendo ou a caixa estiver baixa.",
+                            "cerca de ${duracao(cicloS)} no total. Ela é pulada se estiver chovendo ou a caixa estiver baixa, " +
+                            "e para sozinha se começar a chover.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
