@@ -54,7 +54,7 @@ e a casa inicial. Casa nova no contrato: acrescentar em `SiteId` e em `casasVali
 - `env/*.env` fica fora do git; só `env/exemplo.env.example` é versionado. Sem nenhum `.env`, o build falha de propósito.
 - Usuário novo: copiar o modelo para `env/<nome>.env` (letras e números, começando por minúscula). Não precisa editar o Gradle.
 - Chave nova: acrescentar em `chavesEnv` no `app/build.gradle.kts`, no modelo e em todos os `.env`.
-- `BuildConfig` é legível num APK descompilado: não serve para senha do broker.
+- `BuildConfig` é legível num APK descompilado. A senha do broker está nele por decisão (veja Arquitetura); não ponha outro segredo.
 
 ## Arquitetura
 
@@ -66,10 +66,16 @@ com o app por um broker MQTT na nuvem (EMQX, TLS 8883). Não há API HTTP.
 - **Usuários e permissões do broker**: `../lotus-bkd/broker/README.md` (`app-esp`, `app-clp`, `app-admin`). O EMQX
   nega a inscrição inteira se o filtro for mais amplo que o permitido, então assine `lotus/v1/{site}/#` por site.
 - **Fonte de dados**: as telas só conhecem `LotusRepositorio` (`sites: StateFlow<List<Site>>` e
-  `enviar(site, comando): Resposta`). Hoje a implementação é `SimuladorLotus`, que imita os quadros
-  (mensagens retidas, `state` a cada 15 s, mesmos erros de `ack`, timeout de ~10 s); o cliente MQTT de
-  verdade ainda não existe (nem dependência MQTT/JSON nem permissão de internet no manifest).
-  A troca é feita em `ui/LotusViewModel.kt`.
+  `enviar(site, comando): Resposta`). Duas implementações, escolhidas em `ui/LotusViewModel.kt`:
+  o **debug** usa `SimuladorLotus`, que imita os quadros (mensagens retidas, `state` a cada 15 s, mesmos
+  erros de `ack`, timeout de ~10 s); o **release** usa `MqttLotus` (Paho mqttv3, TLS pelo trust store do
+  Android), que assina `lotus/v1/{site}/#` por casa, publica em `cmd` (QoS 1, não retido) com um UUID
+  no `id` e espera o `cmd/ack` com o mesmo `id` por 10 s. Sem broker, as casas aparecem fora do ar.
+- **JSON do contrato**: `dados/ProtocoloLotus.kt` (org.json, sem MQTT) lê os tópicos para `Site` e escreve
+  os comandos; coberto por `ProtocoloTest`. Mensagem fora do contrato é ignorada, nunca derruba a conexão.
+- **Broker no `.env`**: `MQTT_URL` (`ssl://host:8883` na nuvem, `tcp://10.0.2.2:1883` para o Mosquitto
+  local visto do emulador), `MQTT_USUARIO` (`app-esp`/`app-clp`/`app-admin`, coerente com `CASAS`) e
+  `MQTT_SENHA`. Ficam legíveis no APK descompilado: escolha consciente, os APKs só vão para a família.
 - **Fluxo de comando**: `LotusViewModel.enviar` marca o comando como `Pendente` (o botão entra em progresso),
   espera a `Resposta` e só emite aviso (snackbar) em caso de erro: o novo estado na tela já é a confirmação.
 - **Situação da casa**: `ui/Resumo.kt` reduz um `Site` a um `Resumo` com prioridade fixa

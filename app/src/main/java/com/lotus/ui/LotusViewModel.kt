@@ -3,11 +3,14 @@ package com.lotus.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.lotus.BuildConfig
 import com.lotus.dados.AreasDaCasa
 import com.lotus.dados.AreasDoApp
 import com.lotus.dados.CasasDoUsuario
 import com.lotus.dados.Comando
+import com.lotus.dados.ConfigMqtt
 import com.lotus.dados.LotusRepositorio
+import com.lotus.dados.MqttLotus
 import com.lotus.dados.Resposta
 import com.lotus.dados.SimuladorLotus
 import com.lotus.dados.Site
@@ -30,8 +33,13 @@ data class Pendente(val site: SiteId, val comando: Comando)
 
 class LotusViewModel(app: Application) : AndroidViewModel(app) {
 
-    // Troca pelo repositório MQTT quando o broker estiver no ar.
-    private val fonte: LotusRepositorio = SimuladorLotus(viewModelScope, CasasDoUsuario)
+    // Debug fica no simulador (telas e testes sem broker); o release fala com os quadros de verdade.
+    private val fonte: LotusRepositorio =
+        if (BuildConfig.DEBUG) SimuladorLotus(viewModelScope, CasasDoUsuario)
+        else MqttLotus(
+            viewModelScope, CasasDoUsuario,
+            ConfigMqtt(BuildConfig.MQTT_URL, BuildConfig.MQTT_USUARIO, BuildConfig.MQTT_SENHA),
+        )
 
     private val areasDoApp = AreasDoApp(app)
 

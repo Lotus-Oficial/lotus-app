@@ -11,7 +11,8 @@ plugins {
 // Um APK por usuário: cada env/<nome>.env vira o flavor <nome>, todos com o mesmo applicationId.
 val pastaEnv: File = rootProject.file("env")
 val arquivosEnv: List<File> = pastaEnv.listFiles { f -> f.isFile && f.extension == "env" }.orEmpty().sortedBy { it.name }
-val chavesEnv = listOf("NOME_USUARIO", "ID_USUARIO")
+// MQTT_*: broker e usuário do app (lotus-bkd/broker/README.md). Ficam legíveis no APK descompilado.
+val chavesEnv = listOf("NOME_USUARIO", "ID_USUARIO", "MQTT_URL", "MQTT_USUARIO", "MQTT_SENHA")
 // CASAS=esp,clp: as casas que o APK mostra. Mesmos valores de SiteId.topico (dados/Contrato.kt).
 val casasValidas = listOf("esp", "clp")
 
@@ -70,6 +71,10 @@ android {
                     val valor = env[chave] ?: throw GradleException("${arquivo.name}: falta $chave")
                     buildConfigField("String", chave, valor.comoLiteral())
                 }
+                val url = env.getValue("MQTT_URL")
+                if (!url.matches(Regex("(ssl|tcp)://[^/:]+:\\d+"))) {
+                    throw GradleException("${arquivo.name}: MQTT_URL precisa ser ssl://host:porta ou tcp://host:porta.")
+                }
                 val casas = (env["CASAS"] ?: throw GradleException("${arquivo.name}: falta CASAS"))
                     .split(",").map { it.trim() }.filter { it.isNotEmpty() }.distinct()
                 if (casas.isEmpty() || casas.any { it !in casasValidas }) {
@@ -119,6 +124,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.haze)
+    implementation(libs.paho.mqttv3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.compose.ui)
@@ -127,6 +133,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
+    // O org.json do android.jar é só stub nos testes de unidade.
+    testImplementation(libs.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
