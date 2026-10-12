@@ -127,9 +127,14 @@ private fun lerEstado(o: JSONObject) = EstadoQuadro(
 private fun lerZona(numero: Int, o: JSONObject) = Zona(
     numero = numero,
     ligada = o.getBoolean("on"),
-    nome = o.getString("name"),
+    nome = nomeDeArea(o.getString("name")),
     duracaoPadraoS = o.getInt("defaultDurationS"),
 )
+
+private val nomeGenerico = Regex("""\s*zona\s*(\d+)\s*""", RegexOption.IGNORE_CASE)
+
+/** O quadro sai de fábrica com "Zona 3"; a tela chama de área. Nome dado de verdade ("Horta") passa igual. */
+private fun nomeDeArea(nome: String) = nomeGenerico.matchEntire(nome)?.let { "Área ${it.groupValues[1]}" } ?: nome
 
 private fun lerSensores(o: JSONObject) = Sensores(
     chuva = o.getBoolean("rain"),

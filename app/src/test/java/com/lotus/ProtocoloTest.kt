@@ -84,6 +84,14 @@ class ProtocoloTest {
         assertEquals(2, comInfo.msg("zone/2/state", """{"on":false,"name":"Horta","defaultDurationS":600}""").zonas.size)
     }
 
+    @Test fun nomeGenericoDoQuadroViraArea() {
+        val s = vazio
+            .msg("zone/1/state", """{"on":false,"name":"Zona 1","defaultDurationS":600}""")
+            .msg("zone/2/state", """{"on":false,"name":"zona 2","defaultDurationS":600}""")
+            .msg("zone/3/state", """{"on":false,"name":"Zona norte","defaultDurationS":600}""")
+        assertEquals(listOf("Área 1", "Área 2", "Zona norte"), s.zonas.map { it.nome })
+    }
+
     @Test fun sensoresEAgenda() {
         val s = vazio
             .msg("sensors", """{"rain":true,"level":"low"}""")
